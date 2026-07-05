@@ -11,7 +11,7 @@ import (
 func json_query(endpoint string)(string, error){
 	log.SetPrefix("json_query: ")
 	log.SetFlags(0)
-	
+
 	//Empty string check
 	if (endpoint == "") {
 		return "", errors.New("Empty endpoint")
@@ -39,6 +39,6 @@ func json_query(endpoint string)(string, error){
 }
 
 func poke_query(id string)(string, error){ 
-	endpoint := "https://pokeapi.co/api/v2/pokemon/" + id
+	endpoint := SITE + "pokemon/" + id
 	return json_query(endpoint)
 }

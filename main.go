@@ -3,10 +3,16 @@ package main
 import (
 	"fmt"
 	"log"
+	"os"
 )
 
+var SITE string = "https://pokeapi.co/api/v2/"
 
 func main() {
+	if os.Getenv("DEV") == "1"{
+		SITE = "http://localhost:8080/"
+	}
+
 	log.SetPrefix("pk7db: ")
 	//Format: Ldate, Ltime, Lshortfile
 	log.SetFlags(0b11001000)
@@ -19,7 +25,7 @@ func main() {
 		log.Fatal(err.Error())
 	}
 
-	fmt.Print(data)
+	fmt.Print(data[:111])
 }
 
 /* important commands:
