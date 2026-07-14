@@ -7,7 +7,6 @@ import (
 	"io"
 	"log"
 	"net/http"
-	// "encoding/json"
 )
 
 func json_query(endpoint string) ([]byte, error) {
@@ -56,7 +55,7 @@ func poke_query(id string) (PokemonSpecies, error) {
 
 	// Unpack the JSON data into a PokemonSpecies struct
 	var pokemon PokemonSpecies
-	json.Unmarshal(data, &pokemon)
+	err = json.Unmarshal(data, &pokemon)
 
 	if err != nil {
 		return PokemonSpecies{}, fmt.Errorf("JSON unmarshal for Pokémon %q failed: %w", id, err)

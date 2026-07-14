@@ -8,13 +8,14 @@ import (
 	"time"
 )
 
-var IS_DEV_BUILD bool = false
+var IS_DEV_BUILD bool = true // must be set to false for every version bump
 var SITE string = "https://pokeapi.co/api/v2/"
 var VERSION string = "0.0.1"
 var PROJECT_NAME string = "Poké7DB"
 
 func generateVersionNumber() {
 	// If not development build, don't print commit details
+	// %TODO pre-release / beta/ alpha / release tag support
 	if !IS_DEV_BUILD {
 		VERSION = fmt.Sprintf("%s v%s", PROJECT_NAME, VERSION)
 		return
@@ -46,7 +47,7 @@ func generateVersionNumber() {
 		}
 	}
 
-	VERSION = fmt.Sprintf("%s v%s-%s-%s%s", PROJECT_NAME, VERSION, revTime, commit, modified)
+	VERSION = fmt.Sprintf("%s v%s.dev-%s_%s%s", PROJECT_NAME, VERSION, revTime, commit, modified)
 }
 
 func main() {
