@@ -1,7 +1,23 @@
 /*
 Usage:
-make run
+
+  make run
+    Runs the program against the API using the default Pokémon (ID 197 / Umbreon)
+
+  make run ID=<pokemon>
+    Runs the program against the API using the specified Pokémon ID or name
+    Example:
+      make run ID=ampharos
+
+  make run-dev
+    Runs the program against a local API instance using the default Pokémon
+
+  make run-dev ID=<pokemon>
+    Runs the program against a local API instance using the specified Pokémon
+    Example:
+      make run-dev ID=espeon
 */
+
 package main
 
 import (
@@ -12,9 +28,9 @@ import (
 	"time"
 )
 
-var IS_DEV_BUILD bool = true // must be set to false for every version bump
+var IS_DEV_BUILD bool = false // must be set to false for every version bump
 var SITE string = "https://pokeapi.co/api/v2/"
-var VERSION string = "0.0.2"
+var VERSION string = "0.0.3"
 var PROJECT_NAME string = "Poké7DB"
 
 func generateVersionNumber() {
@@ -55,12 +71,12 @@ func generateVersionNumber() {
 }
 
 func main() {
-	// if $env:DEV="1" (in powershell) then use locally stored instead
+	// if $env:P7D_ENV="dev" then use locally stored instead
 
 	generateVersionNumber()
 	fmt.Println(VERSION)
 
-	if os.Getenv("DEV") == "1" {
+	if os.Getenv("P7D_ENV") == "dev" {
 		SITE = "http://localhost:8080/"
 	}
 
@@ -68,8 +84,8 @@ func main() {
 	//Format: Ldate, Ltime, Lshortfile
 	log.SetFlags(0b11001000)
 
-	// testing variable
-	pokemonID := "197"
+	// testing variable (defaults to 197 as per Makefile)
+	pokemonID := os.Args[1]
 
 	data, err := poke_query(pokemonID)
 
