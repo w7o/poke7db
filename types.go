@@ -55,6 +55,15 @@ type PokemonStat struct {
 }
 
 /*
+Represents a Pokémon's type
+and whether or not it's a maintype (slot = 1) or not
+*/
+type PokemonType struct {
+	Type NamedResource `json:"type"`
+	Slot int           `json:"slot"`
+}
+
+/*
 This struct contains the six base stats of a Pokémon species
 */
 type StatBlock struct {
@@ -68,17 +77,18 @@ type StatBlock struct {
 
 /*
 This struct defines a Pokémon's basic statistics derived from their species
+(Both /pokemon and /pokemon-species are merged into this singular struct)
 */
-type PokemonSpecies struct {
-	Name      string           `json:"name"`            // Name of the Pokémon
+type Pokemon struct {
+	Name      string           `json:"name"`            // Name of the Pokémon (all lowercase)
+	ID        int              `json:"id"`              // PokeAPI ID number
 	Height    int              `json:"height"`          // Height of the Pokémon, in 0.1kg
 	Weight    int              `json:"weight"`          // Weight of the Pokémon, in 0.1kg
 	BaseEXP   int              `json:"base_experience"` // Base experience yield from defeating this Pokémon
 	Abilities []PokemonAbility `json:"abilities"`       // Available abilities of a Pokémon (up to 3)
 	Moves     []PokemonMove    `json:"moves"`           // Available moves of a Pokémon across all generations
+	Types     []PokemonType    `json:"types"`           // The list of types a Pokémon has
 	StatBlock StatBlock        `json:"stats"`           // A struct with the six base stats of a species
-
-	FormFlag int // Form number of the Pokémon (Default: 0)
 
 	BHappiness  int         // Default happiness, max 255
 	CaptureRate int         // Species-dependent capture probability
@@ -86,6 +96,7 @@ type PokemonSpecies struct {
 
 	Color      string // Cosmetic color used within the Pokédex
 	Generation int    // Generation of origin
+	FormFlag   int    // Form number of the Pokémon (Default: 0)
 
 	/*
 		Add in future?

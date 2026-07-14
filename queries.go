@@ -44,21 +44,21 @@ func json_query(endpoint string) ([]byte, error) {
 /*
 Queries the API and returns a struct containing all exported information
 */
-func poke_query(id string) (PokemonSpecies, error) {
+func poke_query(id string) (Pokemon, error) {
 	endpoint := SITE + "pokemon/" + id
 	// Grab JSON data using endpoint
 	data, err := json_query(endpoint)
 
 	if err != nil {
-		return PokemonSpecies{}, fmt.Errorf("JSON query failed: %w", err)
+		return Pokemon{}, fmt.Errorf("JSON query failed: %w", err)
 	}
 
 	// Unpack the JSON data into a PokemonSpecies struct
-	var pokemon PokemonSpecies
+	var pokemon Pokemon
 	err = json.Unmarshal(data, &pokemon)
 
 	if err != nil {
-		return PokemonSpecies{}, fmt.Errorf("JSON unmarshal for Pokémon %q failed: %w", id, err)
+		return Pokemon{}, fmt.Errorf("JSON unmarshal for Pokémon %q failed: %w", id, err)
 	}
 
 	return pokemon, nil
