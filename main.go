@@ -12,7 +12,7 @@ import (
 	"time"
 )
 
-var IS_DEV_BUILD bool = false // must be set to false for every version bump
+var IS_DEV_BUILD bool = true // must be set to false for every version bump
 var SITE string = "https://pokeapi.co/api/v2/"
 var VERSION string = "0.0.2"
 var PROJECT_NAME string = "Poké7DB"
@@ -79,7 +79,7 @@ func main() {
 
 	fmt.Printf("%+v\n", data)
 
-	fmt.Printf("\n%s\n", VERSION)
+	fmt.Printf("\nFinished request on %s\n\n%s\n", SITE, VERSION)
 }
 
 /* important commands:
