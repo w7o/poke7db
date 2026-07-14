@@ -9,6 +9,7 @@ import (
 var SITE string = "https://pokeapi.co/api/v2/"
 
 func main() {
+	// if $env:DEV="1" (in powershell) then use locally stored instead
 	if os.Getenv("DEV") == "1"{
 		SITE = "http://localhost:8080/"
 	}
