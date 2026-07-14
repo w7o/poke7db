@@ -42,9 +42,20 @@ func json_query(endpoint string) ([]byte, error) {
 }
 
 /*
-Queries the API and returns a struct containing all exported information
+ */
+func merge_pokemon_structs(api_species *APIPokemonSpecies, pokemon *Pokemon) {
+	pokemon.BHappiness = api_species.BHappiness
+	pokemon.CaptureRate = api_species.CaptureRate
+	pokemon.Color = api_species.Color
+	pokemon.EggGroups = api_species.EggGroups
+}
+
+/*
+Queries the API for Pokémon statistics, and
+returns a struct containing all exported information
 */
 func poke_query(id string) (Pokemon, error) {
+	// POKEMON
 	endpoint := SITE + "pokemon/" + id
 	// Grab JSON data using endpoint
 	data, err := json_query(endpoint)
@@ -53,13 +64,29 @@ func poke_query(id string) (Pokemon, error) {
 		return Pokemon{}, fmt.Errorf("Pokemon/ JSON query failed: %w", err)
 	}
 
-	// Unpack the JSON data into a PokemonSpecies struct
 	var pokemon Pokemon
 	err = json.Unmarshal(data, &pokemon)
 
 	if err != nil {
 		return Pokemon{}, fmt.Errorf("JSON unmarshal for Pokémon %q failed: %w", id, err)
 	}
+
+	// POKEMON-SPECIES
+	endpoint = SITE + "pokemon-species/" + id
+	data, err = json_query(endpoint)
+
+	if err != nil {
+		return Pokemon{}, fmt.Errorf("Pokemon-species/ JSON query failed: %w", err)
+	}
+
+	var api_species APIPokemonSpecies
+	err = json.Unmarshal(data, &api_species)
+
+	if err != nil {
+		return Pokemon{}, fmt.Errorf("JSON unmarshal for Pokémon Species %q failed: %w", id, err)
+	}
+
+	merge_pokemon_structs(&api_species, &pokemon)
 
 	return pokemon, nil
 }

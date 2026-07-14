@@ -116,9 +116,9 @@ type Pokemon struct {
 	GrowthRate  GrowthClass       // Determines how much XP needed per level
 	EggGroups   []PokemonEggGroup // Which egg group(s) the Pokémon belongs to
 
-	Color      string // Cosmetic color used within the Pokédex
-	Generation int    // Generation of origin
-	FormFlag   int    // Form number of the Pokémon (Default: 0)
+	Color      DexColor // Cosmetic color used within the Pokédex
+	Generation int      // Generation of origin
+	FormFlag   int      // Form number of the Pokémon (Default: 0)
 
 	/*
 		Add in future?
