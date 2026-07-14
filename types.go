@@ -1,7 +1,3 @@
-/*
-Comments marked with $ are notes for myself in the process of learning Golang
-*/
-
 package main
 
 /*
@@ -50,6 +46,27 @@ type PokemonMove struct {
 }
 
 /*
+Represents a Pokémon's base stat as well as the EV yield from
+beating that Pokémon
+*/
+type PokemonStat struct {
+	BaseStat int
+	EVYield  int
+}
+
+/*
+This struct contains the six base stats of a Pokémon species
+*/
+type StatBlock struct {
+	HP             PokemonStat
+	Attack         PokemonStat
+	Defense        PokemonStat
+	SpecialAttack  PokemonStat
+	SpecialDefense PokemonStat
+	Speed          PokemonStat
+}
+
+/*
 This struct defines a Pokémon's basic statistics derived from their species
 */
 type PokemonSpecies struct {
@@ -59,6 +76,7 @@ type PokemonSpecies struct {
 	BaseEXP   int              `json:"base_experience"` // Base experience yield from defeating this Pokémon
 	Abilities []PokemonAbility `json:"abilities"`       // Available abilities of a Pokémon (up to 3)
 	Moves     []PokemonMove    `json:"moves"`           // Available moves of a Pokémon across all generations
+	StatBlock StatBlock        `json:"stats"`           // A struct with the six base stats of a species
 
 	FormFlag int // Form number of the Pokémon (Default: 0)
 
