@@ -7,7 +7,54 @@ Custom unmarshalling logic for specific types found in types.go
 import (
 	"encoding/json"
 	"errors"
+	"net/url"
+	"path"
 )
+
+func (pokemon *Pokemon) UnmarshalJSON(data []byte) error {
+	type Alias Pokemon
+
+	var aux struct {
+		Alias   // includes the rest of the struct
+		Species struct {
+			Name string `json:"name"`
+			URL  string `json:"url"`
+		}
+	}
+
+	err := json.Unmarshal(data, &aux)
+	if err != nil {
+		return err
+	}
+
+	*pokemon = Pokemon(aux.Alias)
+
+	// Grabbing last subdirectory of URL to get the dex number
+	fullURL, err := url.Parse(aux.Species.URL)
+	if err != nil {
+		return err
+	}
+
+	pokemon.DexNum = path.Base(fullURL.Path)
+	pokemon.Name = aux.Species.Name
+
+	return nil
+}
+
+func (dexColor *DexColor) UnmarshalJSON(data []byte) error {
+	var color struct {
+		Name string `json:"name"`
+	}
+
+	err := json.Unmarshal(data, &color)
+	if err != nil {
+		return err
+	}
+
+	// Set DexColor to the color name stored in "color"
+	*dexColor = DexColor(color.Name)
+	return nil
+}
 
 func (statBlock *StatBlock) UnmarshalJSON(data []byte) error {
 	var stats []struct {

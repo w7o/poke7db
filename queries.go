@@ -50,7 +50,7 @@ func poke_query(id string) (Pokemon, error) {
 	data, err := json_query(endpoint)
 
 	if err != nil {
-		return Pokemon{}, fmt.Errorf("JSON query failed: %w", err)
+		return Pokemon{}, fmt.Errorf("Pokemon/ JSON query failed: %w", err)
 	}
 
 	// Unpack the JSON data into a PokemonSpecies struct

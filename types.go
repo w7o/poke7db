@@ -76,11 +76,32 @@ type StatBlock struct {
 }
 
 /*
+This string represents the Pokémon's dex color
+A separate type is needed for unique unmarshalling logic
+*/
+type DexColor string
+
+type PokemonEggGroup NamedResource
+
+/*
+This struct is the data layout for the /pokemon-species/... endpoint,
+that is exported into the main "Pokemon" struct
+*/
+type APIPokemonSpecies struct {
+	BHappiness  int               `json:"base_happiness"`
+	CaptureRate int               `json:"capture_rate"`
+	Color       DexColor          `json:"color"`
+	EggGroups   []PokemonEggGroup `json:"egg_groups"`
+}
+
+/*
 This struct defines a Pokémon's basic statistics derived from their species
 (Both /pokemon and /pokemon-species are merged into this singular struct)
 */
 type Pokemon struct {
-	Name      string           `json:"name"`            // Name of the Pokémon (all lowercase)
+	Name      string           // Name of the Pokémon species
+	DexNum    string           // Pokédex Number, used for calls to pokemon-species endpoint
+	FormName  string           `json:"name"`            // Name of the Pokémon form (all lowercase)
 	ID        int              `json:"id"`              // PokeAPI ID number
 	Height    int              `json:"height"`          // Height of the Pokémon, in 0.1kg
 	Weight    int              `json:"weight"`          // Weight of the Pokémon, in 0.1kg
@@ -90,9 +111,10 @@ type Pokemon struct {
 	Types     []PokemonType    `json:"types"`           // The list of types a Pokémon has
 	StatBlock StatBlock        `json:"stats"`           // A struct with the six base stats of a species
 
-	BHappiness  int         // Default happiness, max 255
-	CaptureRate int         // Species-dependent capture probability
-	GrowthRate  GrowthClass // Determines how much XP needed per level
+	BHappiness  int               // Default happiness, max 255
+	CaptureRate int               // Species-dependent capture probability
+	GrowthRate  GrowthClass       // Determines how much XP needed per level
+	EggGroups   []PokemonEggGroup // Which egg group(s) the Pokémon belongs to
 
 	Color      string // Cosmetic color used within the Pokédex
 	Generation int    // Generation of origin
