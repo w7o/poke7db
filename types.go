@@ -95,22 +95,25 @@ This struct is the data layout for the /pokemon-species/... endpoint,
 that is exported into the main "Pokemon" struct
 */
 type APIPokemonSpecies struct {
-	BHappiness   uint8             `json:"base_happiness"` // 0 - 255
-	CaptureRate  uint8             `json:"capture_rate"`   // 0 - 255
-	Color        DexColor          `json:"color"`
-	EggGroups    []PokemonEggGroup `json:"egg_groups"`
-	GenderRate   int8              `json:"gender_rate"` // -1 - 8
-	Category     Category          `json:"genera"`
-	Generation   Generation        `json:"generation"`
-	HatchCounter int               `json:"hatch_counter"`
-	IsMythical   bool              `json:"is_mythical"`
-	IsLegendary  bool              `json:"is_legendary"`
-	Name         PokemonName       `json:"names"`
-	Shape        PokemonShape      `json:"shape"`
+	BHappiness   uint8             `json:"base_happiness"` // Default happiness, max 255
+	CaptureRate  uint8             `json:"capture_rate"`   // Species-dependent base capture probability, max 255
+	Category     Category          `json:"genera"`         // A label for the Pokémon, e.g. the "Moonlight Pokémon" for Umbreon
+	Color        DexColor          `json:"color"`          // Cosmetic color used within the Pokédex
+	EggGroups    []PokemonEggGroup `json:"egg_groups"`     // Which egg group(s) the Pokémon belongs to
+	GenderRate   int8              `json:"gender_rate"`    // Female gender probability, in 1/8ths (e.g. 3 means 3/8ths chance ♀)
+	Generation   Generation        `json:"generation"`     // Generation of origin
+	HatchCounter int               `json:"hatch_counter"`  // Base factor for determining species-dependent steps to hatch
+	IsMythical   bool              `json:"is_mythical"`    // Whether the Pokémon is classified as mythical
+	IsLegendary  bool              `json:"is_legendary"`   // Whether the Pokémon is classified as legendary
+	Name         PokemonName       `json:"names"`          // Name(s) of the Pokémon species in various languages
+	Shape        PokemonShape      `json:"shape"`          // The shape of the Pokémon as defined in some Pokédexes
 
 	// for further processing
 	EvolutionChain EvolutionChain `json:"evolution_chain"`
 	// FormsList      []PokemonForm  `json:"varieties"`
+
+	// %TODO Pokemon Evolutions Parsing
+	// %TODO Growth rate
 }
 
 /*
@@ -127,26 +130,9 @@ type Pokemon struct {
 	Moves     []PokemonMove    `json:"moves"`           // Available moves of a Pokémon across all generations
 	Types     []PokemonType    `json:"types"`           // The list of types a Pokémon has
 	StatBlock StatBlock        `json:"stats"`           // A struct with the six base stats of a species
+	DexNum    string           // Pokédex Number, used for calls to pokemon-species endpoint
 
-	// Species-dependent, i.e. doesn't depend on a Pokémon's form
-	Name         PokemonName         // Name of the Pokémon species in proper capitalization
-	DexNum       string              // Pokédex Number, used for calls to pokemon-species endpoint
-	BHappiness   uint8               // Default happiness, max 255
-	CaptureRate  uint8               // Species-dependent base capture probability, max 255
-	Category     Category            // A label for the Pokémon, e.g. the "Moonlight Pokémon" for Umbreon
-	GenderRate   int8                // Female gender probability, in 1/8ths (e.g. 3 means 3/8ths chance ♀)
-	GrowthRate   GrowthClass         // Determines how much XP needed per level
-	EggGroups    []PokemonEggGroup   // Which egg group(s) the Pokémon belongs to
-	Evolutions   []PokemonEvolutions // Pokémon the current Pokémon can evolve to
-	HatchCounter int                 // Base factor for determining species-dependent steps to hatch egg
-	Shape        PokemonShape        // The shape of a Pokémon as defined in some Pokédexes
-	IsMythical   bool                // Is the Pokémon a mythical
-	IsLegendary  bool                // Is the Pokémon a legendary
-	// %TODO Pokemon Evolutions Parsing
-	// %TODO Growth rate
-
-	Color      DexColor   // Cosmetic color used within the Pokédex
-	Generation Generation // Generation of origin
+	SpeciesInfo *APIPokemonSpecies
 
 	// Dex Entries handled and stored at the database side
 
