@@ -26,11 +26,13 @@ import (
 	"os"
 	"runtime/debug"
 	"time"
+
+	"github.com/davecgh/go-spew/spew"
 )
 
-var IS_DEV_BUILD bool = true // must be set to false for every version bump
+var IS_DEV_BUILD bool = false // must be set to false for every version bump
 var SITE string = "https://pokeapi.co/api/v2/"
-var VERSION string = "0.0.3"
+var VERSION string = "0.0.4"
 var PROJECT_NAME string = "Poké7DB"
 
 func generateVersionNumber() {
@@ -93,7 +95,8 @@ func main() {
 		log.Fatal(err.Error())
 	}
 
-	fmt.Printf("%+v\n", data)
+	// fmt.Printf("%+v\n", data)
+	spew.Dump(data)
 
 	fmt.Printf("\nFinished request on %s\n\n%s\n", SITE, VERSION)
 }
