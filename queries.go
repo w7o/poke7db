@@ -106,7 +106,7 @@ func poke_query(id string) (Pokemon, error) {
 	}
 
 	// POKEMON-SPECIES
-	url = SITE + "pokemon-species/" + id
+	url = SITE + "pokemon-species/" + string(pokemon.DexNum)
 	data, err = json_query(url)
 
 	if err != nil {
