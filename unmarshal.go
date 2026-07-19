@@ -9,7 +9,70 @@ import (
 	"errors"
 	"net/url"
 	"path"
+	"strconv"
 )
+
+func (category *Category) UnmarshalJSON(data []byte) error {
+	// Grabs specifically the English name of the Pokémon
+	// Does not currently support other languages
+	var genera []struct {
+		Genus    string   `json:"genus"`
+		Language Language `json:"language"`
+	}
+
+	err := json.Unmarshal(data, &genera)
+	if err != nil {
+		return err
+	}
+
+	for _, g := range genera {
+		if g.Language.Name == "en" {
+			*category = Category(g.Genus)
+			return nil
+		}
+	}
+
+	return errors.New("No English category entry found")
+}
+
+func (dexColor *DexColor) UnmarshalJSON(data []byte) error {
+	var color struct {
+		Name string `json:"name"`
+	}
+
+	err := json.Unmarshal(data, &color)
+	if err != nil {
+		return err
+	}
+
+	// Set DexColor to the color name stored in "color"
+	*dexColor = DexColor(color.Name)
+	return nil
+}
+
+func (generation *Generation) UnmarshalJSON(data []byte) error {
+	var g NamedResource
+
+	err := json.Unmarshal(data, &g)
+	if err != nil {
+		return err
+	}
+
+	fullURL, err := url.Parse(g.URL)
+	if err != nil {
+		return err
+	}
+
+	// Converting the last subdirectory of the URL -- which should be an integer --
+	// to a string
+	gen, err := strconv.Atoi(path.Base(fullURL.Path))
+	if err != nil {
+		return err
+	}
+
+	*generation = Generation(gen)
+	return nil
+}
 
 func (pokemon *Pokemon) UnmarshalJSON(data []byte) error {
 	type Alias Pokemon
@@ -41,21 +104,6 @@ func (pokemon *Pokemon) UnmarshalJSON(data []byte) error {
 	return nil
 }
 
-func (dexColor *DexColor) UnmarshalJSON(data []byte) error {
-	var color struct {
-		Name string `json:"name"`
-	}
-
-	err := json.Unmarshal(data, &color)
-	if err != nil {
-		return err
-	}
-
-	// Set DexColor to the color name stored in "color"
-	*dexColor = DexColor(color.Name)
-	return nil
-}
-
 func (statBlock *StatBlock) UnmarshalJSON(data []byte) error {
 	var stats []struct {
 		BaseStat int `json:"base_stat"`
@@ -84,7 +132,7 @@ func (statBlock *StatBlock) UnmarshalJSON(data []byte) error {
 	for _, stat := range stats {
 		target, ok := statMap[stat.Stat.Name]
 		if !ok {
-			return errors.New("Unmarshalling mapping error")
+			return errors.New("Stat block unmarshalling mapping error")
 		}
 		target.BaseStat = stat.BaseStat
 		target.EVYield = stat.EVYield

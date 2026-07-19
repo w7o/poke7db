@@ -46,8 +46,12 @@ func json_query(endpoint string) ([]byte, error) {
 func merge_pokemon_structs(api_species *APIPokemonSpecies, pokemon *Pokemon) {
 	pokemon.BHappiness = api_species.BHappiness
 	pokemon.CaptureRate = api_species.CaptureRate
+	pokemon.Category = api_species.Category
 	pokemon.Color = api_species.Color
 	pokemon.EggGroups = api_species.EggGroups
+	pokemon.GenderRate = api_species.GenderRate
+	pokemon.Generation = api_species.Generation
+	// pokemon.Evolutions =
 }
 
 /*

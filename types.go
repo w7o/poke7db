@@ -68,17 +68,41 @@ A separate type is needed for unique unmarshalling logic
 */
 type DexColor string
 
+type Category string
+
 type PokemonEggGroup NamedResource
+
+type EvolutionChain NamedResource
+
+type Language NamedResource
+
+type Generation int
+
+/*
+This struct represents the Pokémon's next evolutions
+*/
+type PokemonEvolutions struct {
+	URL        string          // Will allow the choosing of evolution method later
+	Evolutions []NamedResource // List of Pokémon with their own species URLs
+	// ^ Note: Evolution methods may vary between main series games
+}
 
 /*
 This struct is the data layout for the /pokemon-species/... endpoint,
 that is exported into the main "Pokemon" struct
 */
 type APIPokemonSpecies struct {
-	BHappiness  int               `json:"base_happiness"`
-	CaptureRate int               `json:"capture_rate"`
+	BHappiness  uint8             `json:"base_happiness"` // 0 - 255
+	CaptureRate uint8             `json:"capture_rate"`   // 0 - 255
 	Color       DexColor          `json:"color"`
 	EggGroups   []PokemonEggGroup `json:"egg_groups"`
+	GenderRate  int8              `json:"gender_rate"` // -1 - 8
+	Category    Category          `json:"genera"`      // "The Mouse Pokémon" etc
+	Generation  Generation        `json:"generation"`  // Which gen this Pokémon was introduced
+
+	// PokéAPI only stores evolution chains and previous evolutions,
+	// thereby requiring further processing for the Evolutions field
+	EvolutionChain EvolutionChain `json:"evolution_chain"`
 }
 
 /*
@@ -98,14 +122,21 @@ type Pokemon struct {
 	Types     []PokemonType    `json:"types"`           // The list of types a Pokémon has
 	StatBlock StatBlock        `json:"stats"`           // A struct with the six base stats of a species
 
-	BHappiness  int               // Default happiness, max 255
-	CaptureRate int               // Species-dependent capture probability
-	GrowthRate  GrowthClass       // Determines how much XP needed per level
-	EggGroups   []PokemonEggGroup // Which egg group(s) the Pokémon belongs to
+	BHappiness  uint8               // Default happiness, max 255
+	CaptureRate uint8               // Species-dependent base capture probability, max 255
+	Category    Category            // A label for the Pokémon, e.g. the "Moonlight Pokémon" for Umbreon
+	GenderRate  int8                // Female gender probability, in 1/8ths (e.g. 3 means 3/8ths chance ♀)
+	GrowthRate  GrowthClass         // Determines how much XP needed per level
+	EggGroups   []PokemonEggGroup   // Which egg group(s) the Pokémon belongs to
+	Evolutions  []PokemonEvolutions // Pokémon the current Pokémon can evolve to
+	// %TODO Pokemon Evolutions Parsing
 
-	Color      DexColor // Cosmetic color used within the Pokédex
-	Generation int      // Generation of origin
-	FormFlag   int      // Form number of the Pokémon (Default: 0)
+	Color      DexColor   // Cosmetic color used within the Pokédex
+	Generation Generation // Generation of origin
+
+	FormFlag int // Form number of the Pokémon (Default: 0)
+
+	// Dex Entries handled and stored at the database side
 
 	/*
 		Add in future?
