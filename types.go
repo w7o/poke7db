@@ -1,21 +1,8 @@
 package main
 
 /*
-Enum representing growth rate / growth class
-Prefix G
+Various types and structs
 */
-type GrowthClass int
-
-const (
-	G_MEDIUM_FAST GrowthClass = iota + 1
-	G_ERRATIC
-	G_FLUCTUATING
-	G_MEDIUM_SLOW
-	G_FAST
-	G_SLOW
-	G_SLIGHT_FAST GrowthClass = 16
-	G_SLIGHT_SLOW GrowthClass = 17
-)
 
 /*
 Represents a generic object with a name and URL to that object's information
