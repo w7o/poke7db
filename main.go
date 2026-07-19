@@ -30,7 +30,7 @@ import (
 	"github.com/davecgh/go-spew/spew"
 )
 
-var IS_DEV_BUILD bool = false // must be set to false for every version bump
+var IS_DEV_BUILD bool = true // must be set to false for every version bump
 var SITE string = "https://pokeapi.co/api/v2/"
 var VERSION string = "0.0.4"
 var PROJECT_NAME string = "Poké7DB"
@@ -73,10 +73,10 @@ func generateVersionNumber() {
 }
 
 func main() {
-	// if $env:P7D_ENV="dev" then use locally stored instead
-
 	generateVersionNumber()
 	fmt.Println(VERSION)
+
+	// if $env:P7D_ENV="dev" then use locally stored instead
 
 	if os.Getenv("P7D_ENV") == "dev" {
 		SITE = "http://localhost:8080/"
