@@ -80,8 +80,8 @@ func (pokemon *Pokemon) UnmarshalJSON(data []byte) error {
 	var aux struct {
 		Alias   // includes the rest of the struct
 		Species struct {
-			Name string `json:"name"`
-			URL  string `json:"url"`
+			// Name string `json:"name"`
+			URL string `json:"url"`
 		}
 	}
 
@@ -99,9 +99,55 @@ func (pokemon *Pokemon) UnmarshalJSON(data []byte) error {
 	}
 
 	pokemon.DexNum = path.Base(fullURL.Path)
-	pokemon.Name = aux.Species.Name
+	// pokemon.Name = aux.Species.Name
 
 	return nil
+}
+
+func (form *PokemonForm) UnmarshalJSON(data []byte) error {
+	var variety struct {
+		Pokemon NamedResource `json:"pokemon"`
+	}
+
+	err := json.Unmarshal(data, &variety)
+	if err != nil {
+		return err
+	}
+
+	fullURL, err := url.Parse(variety.Pokemon.URL)
+	if err != nil {
+		return err
+	}
+
+	n, err := strconv.Atoi(path.Base(fullURL.Path))
+	if err != nil {
+		return err
+	}
+
+	form.Name = variety.Pokemon.Name
+	form.APINumber = n
+
+	return nil
+}
+
+func (name *PokemonName) UnmarshalJSON(data []byte) error {
+	var langNames []struct {
+		Language Language `json:"language"`
+		Name     string   `json:"name"`
+	}
+
+	err := json.Unmarshal(data, &langNames)
+	if err != nil {
+		return err
+	}
+
+	for _, n := range langNames {
+		if n.Language.Name == "en" {
+			*name = PokemonName(n.Name)
+			return nil
+		}
+	}
+	return errors.New("No English PokemonName entry found")
 }
 
 func (statBlock *StatBlock) UnmarshalJSON(data []byte) error {

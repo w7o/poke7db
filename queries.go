@@ -82,6 +82,10 @@ func merge_pokemon_structs(api_species *APIPokemonSpecies, pokemon *Pokemon) {
 	pokemon.GenderRate = api_species.GenderRate
 	pokemon.Generation = api_species.Generation
 	// pokemon.Evolutions =
+	pokemon.Name = api_species.Name
+	pokemon.Shape = api_species.Shape
+	pokemon.IsLegendary = api_species.IsLegendary
+	pokemon.IsMythical = api_species.IsMythical
 }
 
 /*
@@ -115,6 +119,7 @@ func poke_query(id string) (Pokemon, error) {
 
 	var api_species APIPokemonSpecies
 	err = json.Unmarshal(data, &api_species)
+	// fmt.Println(api_species.FormsList)
 
 	if err != nil {
 		return Pokemon{}, fmt.Errorf("JSON unmarshal for Pokémon Species %q failed: %w", id, err)
