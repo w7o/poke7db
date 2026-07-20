@@ -13,6 +13,13 @@ type NamedResource struct {
 }
 
 /*
+Represents a generic object that just has a URL
+*/
+type Resource struct {
+	URL string `json:"url"`
+}
+
+/*
 Represents an ability's species-specific
 properties:
 • Whether or not it's a hidden ability
@@ -74,7 +81,7 @@ A separate type is needed for unique unmarshalling logic
 
 type Category string
 type DexColor string
-type EvolutionChain NamedResource
+type EvolutionChain Resource
 type Generation int
 type Language NamedResource
 type PokemonEggGroup NamedResource

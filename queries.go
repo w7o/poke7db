@@ -73,7 +73,8 @@ func json_query(link string) ([]byte, error) {
 }
 
 /*
- */
+Links the two structs
+*/
 func merge_pokemon_structs(api_species *APIPokemonSpecies, pokemon *Pokemon) {
 	pokemon.SpeciesInfo = api_species
 }
