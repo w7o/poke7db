@@ -93,15 +93,19 @@ type PokemonEvolutions struct {
 /*
 This struct is the data layout for the /pokemon-species/... endpoint,
 that is exported into the main "Pokemon" struct
+
+Tied to the Dex Number in the database
 */
 type APIPokemonSpecies struct {
 	BHappiness   uint8             `json:"base_happiness"` // Default happiness, max 255
 	CaptureRate  uint8             `json:"capture_rate"`   // Species-dependent base capture probability, max 255
 	Category     Category          `json:"genera"`         // A label for the Pokémon, e.g. the "Moonlight Pokémon" for Umbreon
 	Color        DexColor          `json:"color"`          // Cosmetic color used within the Pokédex
+	DexNum       int               `json:"id"`             // Pokédex Number
 	EggGroups    []PokemonEggGroup `json:"egg_groups"`     // Which egg group(s) the Pokémon belongs to
-	GenderRate   int8              `json:"gender_rate"`    // Female gender probability, in 1/8ths (e.g. 3 means 3/8ths chance ♀)
+	GenderRate   int8              `json:"gender_rate"`    // Female gender probability, in 1/8ths; -1 means genderless
 	Generation   Generation        `json:"generation"`     // Generation of origin
+	GrowthRate   GrowthClass       `json:"growth_rate"`    // Determines amount of XP needed to get to a specific level
 	HatchCounter int               `json:"hatch_counter"`  // Base factor for determining species-dependent steps to hatch
 	IsMythical   bool              `json:"is_mythical"`    // Whether the Pokémon is classified as mythical
 	IsLegendary  bool              `json:"is_legendary"`   // Whether the Pokémon is classified as legendary
@@ -119,8 +123,11 @@ type APIPokemonSpecies struct {
 /*
 This struct defines a Pokémon's basic statistics derived from their species
 (Both /pokemon and /pokemon-species are merged into this singular struct)
+
+Tied to the ID in the database
 */
 type Pokemon struct {
+	DexNum    int              // Pokédex Number, used for calls to pokemon-species endpoint
 	FormName  string           `json:"name"`            // Name of the Pokémon form (all lowercase)
 	ID        int              `json:"id"`              // PokeAPI ID number (different per form)
 	Height    int              `json:"height"`          // Height of the Pokémon, in 0.1kg
@@ -130,7 +137,6 @@ type Pokemon struct {
 	Moves     []PokemonMove    `json:"moves"`           // Available moves of a Pokémon across all generations
 	Types     []PokemonType    `json:"types"`           // The list of types a Pokémon has
 	StatBlock StatBlock        `json:"stats"`           // A struct with the six base stats of a species
-	DexNum    string           // Pokédex Number, used for calls to pokemon-species endpoint
 
 	SpeciesInfo *APIPokemonSpecies
 

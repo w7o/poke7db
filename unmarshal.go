@@ -74,6 +74,22 @@ func (generation *Generation) UnmarshalJSON(data []byte) error {
 	return nil
 }
 
+func (growthRate *GrowthClass) UnmarshalJSON(data []byte) error {
+	var g NamedResource
+
+	err := json.Unmarshal(data, &g)
+	if err != nil {
+		return err
+	}
+
+	*growthRate, err = ParseAPIGrowthClass(g.Name)
+	if err != nil {
+		return err
+	}
+
+	return nil
+}
+
 func (pokemon *Pokemon) UnmarshalJSON(data []byte) error {
 	type Alias Pokemon
 
@@ -98,7 +114,11 @@ func (pokemon *Pokemon) UnmarshalJSON(data []byte) error {
 		return err
 	}
 
-	pokemon.DexNum = path.Base(fullURL.Path)
+	pokemon.DexNum, err = strconv.Atoi(path.Base(fullURL.Path))
+	if err != nil {
+		return err
+	}
+
 	// pokemon.Name = aux.Species.Name
 
 	return nil

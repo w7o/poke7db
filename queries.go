@@ -10,6 +10,7 @@ import (
 	"net/url"
 	"os"
 	"path/filepath"
+	"strconv"
 	"strings"
 )
 
@@ -99,7 +100,7 @@ func poke_query(id string) (Pokemon, error) {
 	}
 
 	// POKEMON-SPECIES
-	url = SITE + "pokemon-species/" + string(pokemon.DexNum)
+	url = SITE + "pokemon-species/" + strconv.Itoa(pokemon.DexNum)
 	data, err = json_query(url)
 
 	if err != nil {
