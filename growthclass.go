@@ -9,6 +9,8 @@ import (
 Enum representing growth rate / growth class
 Prefix G
 */
+
+//go:generate stringer -type=GrowthClass
 type GrowthClass int
 
 const (
