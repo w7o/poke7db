@@ -1,9 +1,13 @@
 package main
 
+type GrowthClass string
+
+/*
 import (
 	"fmt"
 	"strings"
 )
+*/
 
 /*
 Enum representing growth rate / growth class
@@ -11,6 +15,7 @@ Prefix G
 */
 
 //go:generate stringer -type=GrowthClass
+/*
 type GrowthClass int
 
 const (
@@ -42,3 +47,4 @@ func ParseAPIGrowthClass(apiString string) (GrowthClass, error) {
 	}
 	return growth, nil
 }
+*/

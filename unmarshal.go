@@ -82,10 +82,12 @@ func (growthRate *GrowthClass) UnmarshalJSON(data []byte) error {
 		return err
 	}
 
-	*growthRate, err = ParseAPIGrowthClass(g.Name)
-	if err != nil {
-		return err
-	}
+	// //*growthRate, err = ParseAPIGrowthClass(g.Name)
+	// if err != nil {
+	// 	return err
+	// }
+
+	*growthRate = GrowthClass(g.Name)
 
 	return nil
 }
