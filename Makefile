@@ -1,3 +1,5 @@
+.PHONY: run run-dev server # ensure these will be run as commands
+
 MAKEFLAGS += --no-print-directory # ignores extra messages from make
 
 ENV ?= prod # environment (production or dev)
@@ -12,3 +14,6 @@ run:
 
 run-dev:
 	$(MAKE) run ENV=dev 
+
+server:
+	go run ./server/.
