@@ -18,9 +18,13 @@ var majorTables = []TableDefinition{
 	{"Ability", abilityTemplate},					// TU004
 	{"Learnset", learnsetTemplate}, 				// TU005
 	{"Move", moveTemplate},							// TU006
-	{"MoveEffects", moveEffectsTemplate},			// TU007
-	{"PokemonTypes", pokemonTypesTemplate},			// TU008
-	{"Evolutions", evolutionsTemplate},				// TU009
+	{"MoveEffect", moveEffectTemplate},				// TU007
+	{"PokemonType", pokemonTypeTemplate},			// TU008
+	{"Evolution", evolutionTemplate},				// TU009
+	{"PokemonHeldItem", pokemonHeldItemTemplate},	// TU010
+	{"Item", itemTemplate},							// TU011
+	{"PokemonEggGroup", pokemonEggGroupTemplate},	// TU012
+	{"MoveMoveFlag", moveMoveFlagTemplate},			// TU013
 }
 
 const endingNonUser string = `
@@ -28,7 +32,7 @@ const endingNonUser string = `
 	importedAt TEXT NOT NULL,
 	checkedAt TEXT,
 	enabled INTEGER NOT NULL DEFAULT 1 
-		CHECK (enabled IN (0, 1))
+		CHECK (enabled IN (0, 1)),
 
 	FOREIGN KEY (originID)
 		REFERENCES DataOrigin(DataOriginID)
@@ -39,7 +43,7 @@ const endingUser string = `
 	createdAt TEXT NOT NULL,
 	updatedAt TEXT,
 	enabled INTEGER NOT NULL DEFAULT 1 
-		CHECK (enabled IN (0, 1))
+		CHECK (enabled IN (0, 1)),
 
 	FOREIGN KEY (originID)
 		REFERENCES DataOrigin(DataOriginID)
@@ -53,23 +57,25 @@ const pokemonSpeciesTemplate string = `
 		CHECK (BaseHappiness >= 0),
 	CaptureRate	INTEGER NOT NULL
 		CHECK (CaptureRate >= 0),
-	GrowthRate INTEGER NOT NULL
+	GrowthRateID INTEGER NOT NULL
 		CHECK (GrowthRate >= 0),
 	GenderRate INTEGER NOT NULL
-		CHECK (GrowthRate >= -1),
+		CHECK (GenderRate >= -1),
 	HatchCounter INTEGER NOT NULL
         CHECK (HatchCounter >= 0),
-    Color INTEGER NOT NULL,
-    Shape INTEGER NOT NULL,
+    ColorID INTEGER NOT NULL,
+    ShapeID INTEGER NOT NULL,
     IsMythical INTEGER NOT NULL
         CHECK (IsMythical IN (0, 1)),
     IsLegendary INTEGER NOT NULL
-        CHECK (IsLegendary IN (0, 1))
+        CHECK (IsLegendary IN (0, 1)),
 	
-	FOREIGN KEY (Color)
+	FOREIGN KEY (ColorID)
 		REFERENCES Color(ColorID)
-	FOREIGN KEY (Shape)
+	FOREIGN KEY (ShapeID)
 		REFERENCES Shape(ShapeID)
+	FOREIGN KEY (GrowthRateID)
+		REFERENCES GrowthRate(GrowthRateID)
 `
 
 const pokemonFormTemplate string = `
@@ -94,7 +100,7 @@ const pokemonFormTemplate string = `
 	Weight INTEGER NOT NULL 
 		CHECK (Weight >= 0),
 	BaseExperienceYield INTEGER NOT NULL 
-		CHECK (BaseExperienceYield >= 0)
+		CHECK (BaseExperienceYield >= 0),
 
 	FOREIGN KEY (PokemonSpeciesID)
 		REFERENCES PokemonSpecies(PokemonSpeciesID)
@@ -118,18 +124,15 @@ const pokemonAbilityTemplate string = `
 const abilityTemplate string = `
     AbilityID INTEGER PRIMARY KEY
         CHECK (AbilityID >= 0),
-    AbliityName TEXT NOT NULL,
+    AbilityName TEXT NOT NULL,
     EffectDescription TEXT NOT NULL
 `
 
 const learnsetTemplate string = `
     PokemonFormID INTEGER NOT NULL,
-		CHECK (PokemonFormID >= 0)
     MoveID INTEGER NOT NULL,
-		CHECK (MoveID >= 0),
-    LearnMethod INTEGER NOT NULL
-        CHECK (LearnMethod >= 0),
-    Level INTEGER NOT NULL
+    LearnMethodID INTEGER NOT NULL,
+    Level INTEGER
         CHECK (Level >= 0),
     LearnDescription TEXT NOT NULL,
 
@@ -138,7 +141,7 @@ const learnsetTemplate string = `
         REFERENCES PokemonForm(PokemonFormID),
     FOREIGN KEY (MoveID)
         REFERENCES Move(MoveID)
-	FOREIGN KEY (LearnMethod)
+	FOREIGN KEY (LearnMethodID)
 		REFERENCES LearnMethod(LearnMethodID)
 `
 
@@ -148,38 +151,38 @@ const moveTemplate string = `
     MoveName TEXT NOT NULL,
     Accuracy INTEGER NOT NULL
         CHECK (Accuracy >= 0),
-    Category INTEGER NOT NULL,
+    CategoryID INTEGER NOT NULL,
     PP INTEGER NOT NULL
         CHECK (PP >= 0),
     Priority INTEGER NOT NULL,
-    Type INTEGER NOT NULL,
+    TypeID INTEGER NOT NULL,
     Power INTEGER NOT NULL
         CHECK (Power >= 0),
-    DamageClass INTEGER NOT NULL,
-    Target INTEGER NOT NULL
+    DamageClassID INTEGER NOT NULL,
+    TargetID INTEGER NOT NULL
         CHECK (Target >= 0),
     CritBonus INTEGER NOT NULL
         CHECK (CritBonus >= 0),
-    MultiHitType INTEGER NOT NULL,
+    MultiHitTypeID INTEGER NOT NULL,
     MoveDescription TEXT NOT NULL
 
-	FOREIGN KEY (Category)
+	FOREIGN KEY (CategoryID)
 		REFERENCES MoveCategory(MoveCategoryID),
-	FOREIGN KEY (Type)
+	FOREIGN KEY (TypeID)
 		REFERENCES Type(TypeID),
-	FOREIGN KEY (DamageClass)
+	FOREIGN KEY (DamageClassID)
 		REFERENCES DamageClass(DamageClassID),
-	FOREIGN KEY (Target)
+	FOREIGN KEY (TargetID)
 		REFERENCES Target(TargetID),
-	FOREIGN KEY (MultiHitType)
+	FOREIGN KEY (MultiHitTypeID)
 		REFERENCES MultiHitProfile(MultiHitProfileID)
 `
 
-const moveEffectsTemplate = `
+const moveEffectTemplate = `
     MoveID INTEGER NOT NULL,
     EffectOrder INTEGER NOT NULL
         CHECK (EffectOrder >= 1),
-    Effect INTEGER NOT NULL,
+    EffectID INTEGER NOT NULL,
     EffectChance INTEGER NOT NULL
         CHECK (EffectChance BETWEEN 0 AND 100),
     EffectValue INTEGER NOT NULL,
@@ -187,11 +190,11 @@ const moveEffectsTemplate = `
     PRIMARY KEY (MoveID, EffectOrder),
     FOREIGN KEY (MoveID)
         REFERENCES Move(MoveID),
-    FOREIGN KEY (Effect)
+    FOREIGN KEY (EffectID)
         REFERENCES Effect(EffectID)
 `
 
-const pokemonTypesTemplate = `
+const pokemonTypeTemplate = `
     PokemonFormID INTEGER NOT NULL,
     Slot INTEGER NOT NULL
         CHECK (Slot >= 0),
@@ -204,33 +207,33 @@ const pokemonTypesTemplate = `
         REFERENCES Type(TypeID)
 `
 
-const evolutionsTemplate = `
+const evolutionTemplate = `
 	EvolutionID INTEGER PRIMARY KEY,
 
-    PokemonSpeciesFrom TEXT NOT NULL,
-    PokemonSpeciesTo TEXT NOT NULL,
-    Method INTEGER NOT NULL,
+    PokemonSpeciesFROM TEXT NOT NULL,
+    PokemonSpeciesTO TEXT NOT NULL,
+    MethodID INTEGER NOT NULL,
     Level INTEGER NOT NULL
         CHECK (Level >= 0),
-    Gender INTEGER,
+    GenderID INTEGER,
     ItemID INTEGER,
-    TimeOfDay INTEGER,
+    TimeOfDayID INTEGER,
     MinimumValue INTEGER,
     Location TEXT,
     KnownMoveID INTEGER,
     KnownMoveTypeID INTEGER,
 
-    FOREIGN KEY (PokemonSpeciesFrom)
+    FOREIGN KEY (PokemonSpeciesFROM)
         REFERENCES PokemonSpecies(PokemonSpeciesID),
-    FOREIGN KEY (PokemonSpeciesTo)
+    FOREIGN KEY (PokemonSpeciesTO)
         REFERENCES PokemonSpecies(PokemonSpeciesID),
-	FOREIGN KEY (Gender)
+	FOREIGN KEY (GenderID)
 		REFERENCES Gender(GenderID),
-	FOREIGN KEY (Method)
+	FOREIGN KEY (MethodID)
 		REFERENCES EvolutionMethod(EvolutionMethodID),
     FOREIGN KEY (ItemID)
         REFERENCES Item(ItemID),
-	FOREIGN KEY (TimeOfDay)
+	FOREIGN KEY (TimeOfDayID)
 		REFERENCES TimeOfDay(TimeID),
     FOREIGN KEY (KnownMoveID)
         REFERENCES Move(MoveID),
@@ -239,9 +242,9 @@ const evolutionsTemplate = `
 `
 
 const pokemonHeldItemTemplate = `
-	PokemonFormID INTEGER,
-	ItemID INTEGER,
-	ChanceHeld INTEGER
+	PokemonFormID INTEGER NOT NULL,
+	ItemID INTEGER NOT NULL,
+	ChanceHeld INTEGER NOT NULL
 		CHECK (ChanceHeld BETWEEN 0 AND 100),
 
 	PRIMARY KEY (PokemonFormID, ItemID),
@@ -254,23 +257,23 @@ const pokemonHeldItemTemplate = `
 const itemTemplate =`
 	ItemID INTEGER PRIMARY KEY
 		CHECK (ItemID >= 0),
-	ItemName TEXT,
+	ItemName TEXT NOT NULL,
 	APIDescription TEXT,
-	BagCategory INTEGER, 
-	FlingEffect INTEGER,
+	BagCategoryID INTEGER,
+	FlingEffectID INTEGER,
 	FlingPower INTEGER,
 	
-	FOREIGN KEY (BagCategory)
+	FOREIGN KEY (BagCategoryID)
 		REFERENCES BagCategory(BagCategoryID),
-	FOREIGN KEY (FlingEffect)
+	FOREIGN KEY (FlingEffectID)
 		REFERENCES Effect(EffectID)
 `
 
 const pokemonEggGroupTemplate =`
-	PokemonSpeciesID INTEGER,
-	Slot INTEGER
+	PokemonSpeciesID INTEGER NOT NULL,
+	Slot INTEGER NOT NULL
 		CHECK (Slot >= 0),
-	EggGroupID INTEGER,
+	EggGroupID INTEGER NOT NULL,
 	
 	PRIMARY KEY (PokemonSpeciesID, Slot),
 	FOREIGN KEY (PokemonSpeciesID)
@@ -281,12 +284,14 @@ const pokemonEggGroupTemplate =`
 
 // TODO: Design and add MoveFlag lookup table
 const moveMoveFlagTemplate = `
-	MoveID INTEGER,
-	Slot INTEGER
+	MoveID INTEGER NOT NULL,
+	Slot INTEGER NOT NULL
 		CHECK (Slot >= 0),
-	MoveFlagID INTEGER,
+	MoveFlagID INTEGER NOT NULL,
 
 	PRIMARY KEY (MoveID, Slot),
+	FOREIGN KEY (MoveID)
+		REFERENCES Move(MoveID)
 	FOREIGN KEY (MoveFlagID)
 		REFERENCES MoveFlag(MoveFlagID) -- not yet implemented
 `
