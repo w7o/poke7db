@@ -1,24 +1,24 @@
 /*
 Usage:
-  make run
-    Runs the program against the API using the default Pokémon (ID 197 / Umbreon)
+make run
+	Runs the program against the API using the default Pokémon (ID 197 / Umbreon)
 
-  make run ID=<pokemon>
-    Runs the program against the API using the specified Pokémon ID or name
-    Example:
-      make run ID=ampharos
+make run ID=<pokemon>
+Runs the program against the API using the specified Pokémon ID or name
+	Example:
+		make run ID=ampharos
 
 make server 
 	Starts the local API instance. Must be run in a separate terminal, and must
 	be run before run-dev. 
 
-  make run-dev
-    Runs the program against a local API instance using the default Pokémon
+make run-dev
+	Runs the program against a local API instance using the default Pokémon
 
-  make run-dev ID=<pokemon>
-    Runs the program against a local API instance using the specified Pokémon
-    Example:
-      make run-dev ID=espeon
+make run-dev ID=<pokemon>
+	Runs the program against a local API instance using the specified Pokémon
+	Example:
+		make run-dev ID=espeon
 */
 
 package main
@@ -75,6 +75,7 @@ func generateVersionNumber() {
 	VERSION = fmt.Sprintf("%s v%s.dev-%s_%s%s", PROJECT_NAME, VERSION, revTime, commit, modified)
 }
 
+
 func main() {
 	generateVersionNumber()
 	fmt.Println(VERSION)
@@ -86,11 +87,14 @@ func main() {
 	}
 
 	log.SetPrefix("pk7db: ")
-	//Format: Ldate, Ltime, Lshortfile
+	// Format: Ldate, Ltime, Lshortfile
 	log.SetFlags(0b11001000)
 
 	// testing variable (defaults to 197 as per Makefile)
 	pokemonID := os.Args[1]
+
+	// initialize database
+	DatabaseInit("./database/app.db")
 
 	data, err := poke_query(pokemonID)
 

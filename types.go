@@ -88,6 +88,8 @@ type PokemonEggGroup NamedResource
 type PokemonName string
 type PokemonShape NamedResource
 
+type GrowthClass string
+
 /*
 This struct represents the Pokémon's next evolutions
 */
