@@ -1,0 +1,16 @@
+EggGroupID,Name,originID,Description
+0,Monster,3,NULL
+1,Human-Like,3,NULL
+2,Water 1,3,NULL
+3,Water 3,3,NULL
+4,Bug,3,NULL
+5,Mineral,3,NULL
+6,Flying,3,NULL
+7,Amorphous,3,NULL
+8,Field,3,NULL
+9,Water 2,3,NULL
+10,Fairy,3,NULL
+11,Ditto,3,NULL
+12,Grass,3,NULL
+13,Dragon,3,NULL
+14,No Eggs Discovered,3,NULL

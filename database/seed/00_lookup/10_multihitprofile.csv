@@ -1,0 +1,7 @@
+MultiHitProfileID,Name,originID,Description
+0,DEFAULT_MULTIHIT_2_5,3,"Hits 2-5 times with fixed probabilities for each hit amount"
+1,PARTY_COUNT,3,"Hits depending on the number of Pokémon in the user’s party."
+2,FIXED_2_STRIKES,3,"Hits exactly twice."
+3,FIXED_3_STRIKES,3,"Hits exactly three times."
+4,MOVE_ACCURACY_10,3,"Hits up to 10 times based on the move’s accuracy."
+5,MOVE_ACCURACY_3,3,"Hits up to 3 times based on the move’s accuracy."

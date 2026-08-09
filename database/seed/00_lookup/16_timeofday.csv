@@ -1,0 +1,5 @@
+TimeOfDayID,Name,originID,Description
+0,Day,3,NULL
+1,Night,3,NULL
+2,Morning,3,NULL
+3,Evening,3,NULL

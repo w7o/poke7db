@@ -1,4 +1,3 @@
 GenderID INTEGER PRIMARY KEY
     CHECK (GenderID >= 0),
-Name TEXT NOT NULL,
-Description TEXT
+Name TEXT NOT NULL

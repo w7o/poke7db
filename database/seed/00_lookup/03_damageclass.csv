@@ -1,0 +1,4 @@
+DamageClassID,Name,originID
+0,Physical,3
+1,Special,3
+2,Status,3

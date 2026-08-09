@@ -1,0 +1,27 @@
+EffectID,Name,originID,Description
+0,Paralysis,1,NULL
+1,Sleep,1,NULL
+2,Freeze,1,NULL
+3,Burn,1,NULL
+4,Poison,1,NULL
+5,Badly Poison,1,NULL
+6,Confusion,1,NULL
+7,Infatuation,1,NULL
+8,Heal,1,"PokéAPI - separate from effects"
+9,Flinch,1,"PokéAPI - separate from effects"
+10,Trap,1,NULL
+11,Nightmare,1,NULL
+12,Torment,1,NULL
+13,Disable,1,NULL
+14,Yawn,1,NULL
+15,Heal Block,1,NULL
+16,Remove Type Immunity,1,"e.g. Foresight"
+17,Leech Seed,1,NULL
+18,Embargo,1,NULL
+19,Perish Song,1,NULL
+20,Ingrain,1,NULL
+48,Tri-Attack,1,NULL
+49,Floating,1,"Telekinesis"
+50,Grounded,1,"Smack Down, Thousand Arrows"
+64,Consume Berry,1,"Fling effect exclusive"
+65,Consume Herb,1,"Fling effect exclusive"

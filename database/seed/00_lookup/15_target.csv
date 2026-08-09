@@ -1,0 +1,17 @@
+TargetID,Name,originID,Description
+0,Move-Specific,1,NULL
+1,Selected Target,1,NULL
+2,Ally,1,NULL
+3,User's Field,1,NULL
+4,User or Ally,1,NULL
+5,Opponent's Field,1,NULL
+6,User,1,NULL
+7,Random Opponent,1,NULL
+8,All Other Pokémon,1,NULL
+9,Selected Pokémon,1,NULL
+10,All Opponents,1,NULL
+11,Entire Field,1,NULL
+12,User and Allies,1,NULL
+13,All Pokémon,1,NULL
+14,All Allies,1,NULL
+15,Fainting Pokémon,1,NULL
