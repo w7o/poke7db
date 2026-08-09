@@ -1,0 +1,10 @@
+PokemonFormID INTEGER NOT NULL,
+Slot INTEGER NOT NULL
+    CHECK (Slot >= 0),
+TypeID INTEGER NOT NULL,
+
+PRIMARY KEY (PokemonFormID, Slot),
+FOREIGN KEY (PokemonFormID)
+    REFERENCES PokemonForm(PokemonFormID),
+FOREIGN KEY (TypeID)
+    REFERENCES Type(TypeID)

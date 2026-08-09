@@ -1,7 +1,7 @@
 package main
 
 import (
-	"context"
+	// "context"
 	"database/sql"
 	"fmt"
 	"log"
@@ -43,16 +43,16 @@ func DatabaseInit(filepath string){
 		log.Fatal(err)
 	}
 
-	var query string = createTableQuery(
-		"PokemonForm", pokemonFormTemplate, nonUserMetadata)
+	// var query string = createTableQuery(
+	// 	"PokemonForm", pokemonFormTemplate, nonUserMetadata)
 
-	// Create PokemonForm database
-	_, err = database.ExecContext(
-		context.Background(),
-		query,
-	)
-	if err != nil{
-		log.Fatal(err)
-	}
+	// // Create PokemonForm database
+	// _, err = database.ExecContext(
+	// 	context.Background(),
+	// 	query,
+	// )
+	// if err != nil{
+	// 	log.Fatal(err)
+	// }
 	fmt.Println("SQLite database initialized")
 }
