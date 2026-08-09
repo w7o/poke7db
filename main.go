@@ -33,9 +33,9 @@ import (
 	"github.com/davecgh/go-spew/spew"
 )
 
-var IS_DEV_BUILD bool = true // must be set to false for every version bump
+var IS_DEV_BUILD bool = false // must be set to false for every version bump
 var SITE string = "https://pokeapi.co/api/v2/"
-var VERSION string = "0.0.6"
+var VERSION string = "0.0.7"
 var PROJECT_NAME string = "Poké7DB"
 
 func generateVersionNumber() {
@@ -94,7 +94,7 @@ func main() {
 	pokemonID := os.Args[1]
 
 	// initialize database
-	DatabaseInit("./database/app.db")
+	// DatabaseInit("./database/app.db")
 
 	data, err := poke_query(pokemonID)
 
