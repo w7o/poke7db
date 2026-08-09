@@ -27,7 +27,7 @@ var majorTables = []TableDefinition{
 	{"MoveMoveFlag", moveMoveFlagTemplate},			// TU013
 }
 
-const endingNonUser string = `
+const nonUserMetadata string = `
 	originID INTEGER NOT NULL,
 	importedAt TEXT NOT NULL,
 	checkedAt TEXT,
@@ -38,7 +38,7 @@ const endingNonUser string = `
 		REFERENCES DataOrigin(DataOriginID)
 `
 
-const endingUser string = `
+const userMetadata string = `
 	originID INTEGER NOT NULL,
 	createdAt TEXT NOT NULL,
 	updatedAt TEXT,

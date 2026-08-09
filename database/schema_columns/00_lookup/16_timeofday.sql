@@ -1,0 +1,4 @@
+TimeOfDayID INTEGER PRIMARY KEY
+    CHECK (TimeOfDayID >= 0),
+Name TEXT NOT NULL,
+Description TEXT 

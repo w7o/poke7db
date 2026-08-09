@@ -1,0 +1,3 @@
+ColorID INTEGER PRIMARY KEY
+    CHECK (ColorID >= 0),
+Name TEXT NOT NULL

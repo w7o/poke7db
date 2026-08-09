@@ -1,0 +1,4 @@
+ShapeID INTEGER PRIMARY KEY
+    CHECK (ShapeID >= 0),
+Name TEXT NOT NULL,
+Description TEXT 

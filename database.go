@@ -44,7 +44,7 @@ func DatabaseInit(filepath string){
 	}
 
 	var query string = createTableQuery(
-		"PokemonForm", pokemonFormTemplate, endingNonUser)
+		"PokemonForm", pokemonFormTemplate, nonUserMetadata)
 
 	// Create PokemonForm database
 	_, err = database.ExecContext(
