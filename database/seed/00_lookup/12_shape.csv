@@ -1,15 +1,15 @@
 ShapeID,Name,originID,Description
-0,Quadruped,3,
-1,Humanoid,3,
-2,Upright,3,
-3,Serpentine,3,
-4,Bug-Winged,3,
-5,Winged,3,
-6,Insectoid,3,
-7,Blob,3,
-8,Armed,3,
-9,Legged,3,
-10,Multiped,3,
-11,Fish,3,
-12,Ball,3,
-13,Multi-Body,3,
+0,Quadruped,3,"Four-legged/quadruped"
+1,Humanoid,3,"Bipedal & tailless"
+2,Upright,3,"Bipedal + tail"
+3,Serpentine,3,"Snake-esque/serpentine body"
+4,Bug-Winged,3,"Two or more pairs of wings"
+5,Winged,3,"One pair of wings"
+6,Insectoid,3,"""regular"" Bug-like shape"
+7,Blob,3,"Head and body"
+8,Armed,3,"Head and arms"
+9,Legged,3,"Head and legs"
+10,Multiped,3,"Head and many legs/tentacles"
+11,Fish,3,"Fish-like"
+12,Ball,3,"Head-only"
+13,Multi-Body,3,"Pokemon with multiple bodies"

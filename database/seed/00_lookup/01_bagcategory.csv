@@ -1,9 +1,13 @@
-BagCategoryID,Name,originID
-0,Miscellaneous,1
-1,Medicine,1
-2,Pokéballs,1
-3,Machines,1
-4,Berries,1
-5,Mail,1
-6,Battle Items,1
-7,Key Items,1
+BagCategoryID,Name,originID,Description
+0,Miscellaneous,1,"Contains all items not in other pockets"
+1,Medicine,1,"Contains all healing and permanent stat-enhancing medicine."
+2,Pokéballs,1,"Contains Pokéballs and variants. Merged into Misc in some games"
+3,Machines,1,"Contains all TMs and HMs"
+4,Berries,1,"Contains all Berries"
+5,Mail,1,"Contains Mail in games that have mail"
+6,Battle Items,1,"Contains all Battle Items. Merged into Misc in some games"
+7,Key Items,1,"Contains Key Items that cannot be discarded from the inventory"
+8,Z-Crystals,3,"[GEN 7] Cotnains all Z-Crystals"
+9,Rotom Powers,3,"[GEN 7] Contains all Rotom Powers"
+10,Treasures,3,"[GEN 8] Contains all valuable items"
+11,Ingredients,3,"[GEN 8] Contains all curry ingredients"
