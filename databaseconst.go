@@ -44,6 +44,8 @@ const userMetadata string = `
 	updatedAt TEXT,
 	enabled INTEGER NOT NULL DEFAULT 1 
 		CHECK (enabled IN (0, 1)),
+	ID INTEGER UNIQUE,
+		CHECK (ID IS NOT NULL OR enabled = FALSE)
 
 	FOREIGN KEY (originID)
 		REFERENCES DataOrigin(DataOriginID)
