@@ -8,9 +8,9 @@ Runs the program against the API using the specified Pokémon ID or name
 	Example:
 		make run ID=ampharos
 
-make server 
+make server
 	Starts the local API instance. Must be run in a separate terminal, and must
-	be run before run-dev. 
+	be run before run-dev.
 
 make run-dev
 	Runs the program against a local API instance using the default Pokémon
@@ -75,7 +75,6 @@ func generateVersionNumber() {
 	VERSION = fmt.Sprintf("%s v%s.dev-%s_%s%s", PROJECT_NAME, VERSION, revTime, commit, modified)
 }
 
-
 func main() {
 	generateVersionNumber()
 	fmt.Println(VERSION)
@@ -94,7 +93,11 @@ func main() {
 	pokemonID := os.Args[1]
 
 	// initialize database
-	// DatabaseInit("./database/app.db")
+	database, err := DatabaseInit("./database/app.db")
+	if err != nil {
+		log.Fatal(err)
+	}
+	defer database.Close()
 
 	data, err := poke_query(pokemonID)
 
