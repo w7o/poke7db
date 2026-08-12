@@ -14,6 +14,7 @@ Location TEXT,
 KnownMoveID INTEGER,
 KnownMoveTypeID INTEGER,
 
+-- @constraints
 FOREIGN KEY (PokemonSpeciesFROM)
     REFERENCES PokemonSpecies(PokemonSpeciesID),
 FOREIGN KEY (PokemonSpeciesTO)

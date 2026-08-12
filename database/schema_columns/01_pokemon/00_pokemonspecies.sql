@@ -19,6 +19,7 @@ IsMythical INTEGER NOT NULL
 IsLegendary INTEGER NOT NULL
     CHECK (IsLegendary IN (0, 1)),
 
+-- @constraints
 FOREIGN KEY (ColorID)
     REFERENCES Color(ColorID),
 FOREIGN KEY (ShapeID)

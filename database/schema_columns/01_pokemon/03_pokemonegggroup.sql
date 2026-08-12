@@ -4,6 +4,7 @@ Slot INTEGER NOT NULL
     CHECK (Slot >= 0),
 EggGroupID INTEGER NOT NULL,
 
+-- @constraints
 PRIMARY KEY (PokemonSpeciesID, Slot),
 FOREIGN KEY (PokemonSpeciesID)
     REFERENCES PokemonSpecies(PokemonSpeciesID)

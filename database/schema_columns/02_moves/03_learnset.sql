@@ -6,6 +6,7 @@ Level INTEGER
     CHECK (Level >= 0),
 LearnDescription TEXT NOT NULL,
 
+-- @constraints
 PRIMARY KEY (PokemonFormID, MoveID, LearnMethod, Level),
 FOREIGN KEY (PokemonFormID)
     REFERENCES PokemonForm(PokemonFormID),

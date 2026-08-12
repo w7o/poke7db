@@ -4,6 +4,7 @@ ItemID INTEGER NOT NULL,
 ChanceHeld INTEGER NOT NULL
     CHECK (ChanceHeld BETWEEN 0 AND 100),
 
+-- @constraints
 PRIMARY KEY (PokemonFormID, ItemID),
 FOREIGN KEY (PokemonFormID)
     REFERENCES PokemonForm(PokemonFormID),

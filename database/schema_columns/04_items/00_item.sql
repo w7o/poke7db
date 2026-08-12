@@ -7,6 +7,7 @@ BagCategoryID INTEGER,
 FlingEffectID INTEGER,
 FlingPower INTEGER,
 
+-- @constraints
 FOREIGN KEY (BagCategoryID)
     REFERENCES BagCategory(BagCategoryID),
 FOREIGN KEY (FlingEffectID)

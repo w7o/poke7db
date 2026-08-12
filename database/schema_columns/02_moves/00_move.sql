@@ -19,6 +19,7 @@ CritBonus INTEGER NOT NULL
 MultiHitTypeID INTEGER NOT NULL,
 MoveDescription TEXT NOT NULL
 
+-- @constraints
 FOREIGN KEY (CategoryID)
     REFERENCES MoveCategory(MoveCategoryID),
 FOREIGN KEY (TypeID)

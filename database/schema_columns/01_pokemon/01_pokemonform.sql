@@ -22,5 +22,6 @@ Weight INTEGER NOT NULL
 BaseExperienceYield INTEGER NOT NULL 
     CHECK (BaseExperienceYield >= 0),
 
+-- @constraints
 FOREIGN KEY (PokemonSpeciesID)
     REFERENCES PokemonSpecies(PokemonSpeciesID)

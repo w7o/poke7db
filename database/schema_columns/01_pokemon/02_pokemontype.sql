@@ -4,6 +4,7 @@ Slot INTEGER NOT NULL
     CHECK (Slot >= 0),
 TypeID INTEGER NOT NULL,
 
+-- @constraints
 PRIMARY KEY (PokemonFormID, Slot),
 FOREIGN KEY (PokemonFormID)
     REFERENCES PokemonForm(PokemonFormID),

@@ -6,6 +6,7 @@ IsHidden INTEGER NOT NULL
     CHECK (IsHidden IN (0, 1)),
 AbilityID INTEGER NOT NULL,
 
+-- @constraints
 PRIMARY KEY (PokemonFormID, Slot),
 FOREIGN KEY (PokemonFormID)
     REFERENCES PokemonForm(PokemonFormID),
