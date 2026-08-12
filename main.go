@@ -76,6 +76,8 @@ func generateVersionNumber() {
 }
 
 func main() {
+	clearErrorFile()
+
 	generateVersionNumber()
 	fmt.Println(VERSION)
 
