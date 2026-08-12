@@ -462,6 +462,7 @@ func stringRows(rows *sql.Rows) (string, error) {
 		header = append(header, column)
 	}
 
+	// Table header
 	t.AppendHeader(header)
 
 	for rows.Next() {
@@ -472,6 +473,7 @@ func stringRows(rows *sql.Rows) (string, error) {
 			pointers[i] = &values[i]
 		}
 
+		// scans rows into the pointers, which themselves point to a table of values
 		err := rows.Scan(pointers...)
 		if err != nil {
 			return "", err
@@ -542,6 +544,9 @@ func DatabaseInit(filepath string) (*sql.DB, error) {
 	return database, nil
 }
 
+/*
+temporary query
+*/
 func DatabaseQuery(database *sql.DB) error {
 	rows, err := database.Query("SELECT * FROM MoveFlag")
 	if err != nil {
