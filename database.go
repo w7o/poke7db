@@ -41,6 +41,15 @@ const userMetadata string = `
 // Initialize Database as a database
 var database *sql.DB
 
+// Convert []string to []any
+func strToAny(values []string) []any {
+	var result []any
+	for _, value := range values {
+		result = append(result, value)
+	}
+	return result
+}
+
 func grabDBFlagParameter(sqlFile string, flag string) (string, error) {
 	for _, line := range strings.Split(sqlFile, "\n") {
 		line = strings.TrimSpace(line)
