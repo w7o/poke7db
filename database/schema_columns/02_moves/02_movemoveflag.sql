@@ -1,3 +1,4 @@
+-- @table MoveMoveFlag
 MoveID INTEGER NOT NULL,
 Slot INTEGER NOT NULL
     CHECK (Slot >= 0),

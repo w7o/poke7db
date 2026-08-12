@@ -1,3 +1,4 @@
+-- @table Move
 MoveID INTEGER PRIMARY KEY
     CHECK (MoveID >= 0),
 MoveName TEXT NOT NULL,

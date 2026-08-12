@@ -1,4 +1,5 @@
+-- @table BagCategory
 BagCategoryID INTEGER PRIMARY KEY
     CHECK (BagCategoryID >= 0),
-Name TEXT NOT NULL
+Name TEXT NOT NULL,
 Description TEXT

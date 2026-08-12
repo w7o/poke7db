@@ -1,3 +1,4 @@
+-- @table TypeEffectiveness
 TypeATK INTEGER,
 TypeDEF INTEGER,
 Multiplier INTEGER NOT NULL,

@@ -1,3 +1,4 @@
+-- @table PokemonHeldItem
 PokemonFormID INTEGER NOT NULL,
 ItemID INTEGER NOT NULL,
 ChanceHeld INTEGER NOT NULL

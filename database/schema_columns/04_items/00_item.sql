@@ -1,3 +1,4 @@
+-- @table Item
 ItemID INTEGER PRIMARY KEY
     CHECK (ItemID >= 0),
 ItemName TEXT NOT NULL,

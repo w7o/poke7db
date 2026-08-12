@@ -1,3 +1,4 @@
+-- @table MoveCategory
 MoveCategoryID INTEGER PRIMARY KEY
     CHECK (MoveCategoryID >= 0),
 Name TEXT NOT NULL,

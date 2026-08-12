@@ -1,3 +1,4 @@
+-- @table Evolution
 EvolutionID INTEGER PRIMARY KEY,
 
 PokemonSpeciesFROM TEXT NOT NULL,

@@ -1,3 +1,4 @@
+-- @table Learnset
 PokemonFormID INTEGER NOT NULL,
 MoveID INTEGER NOT NULL,
 LearnMethodID INTEGER NOT NULL,

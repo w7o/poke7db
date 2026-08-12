@@ -1,3 +1,4 @@
+-- @table Ability
 AbilityID INTEGER PRIMARY KEY
     CHECK (AbilityID >= 0),
 AbilityName TEXT NOT NULL,

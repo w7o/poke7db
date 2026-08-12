@@ -1,3 +1,4 @@
+-- @table PokemonForm
 PokemonFormID INTEGER PRIMARY KEY 
     CHECK (PokemonFormID >= 0),
 PokemonSpeciesID TEXT NOT NULL,

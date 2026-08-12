@@ -1,3 +1,4 @@
+-- @table MultiHitDistribution
 MultiHitProfileID INTEGER,
 HitNumber INTEGER NOT NULL,
 HitWeight INTEGER,

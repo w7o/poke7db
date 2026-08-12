@@ -1,3 +1,4 @@
+-- @table PokemonSpecies
 PokemonSpeciesID TEXT PRIMARY KEY,
 PokemonName TEXT NOT NULL,
 Category TEXT NOT NULL,
@@ -19,8 +20,8 @@ IsLegendary INTEGER NOT NULL
     CHECK (IsLegendary IN (0, 1)),
 
 FOREIGN KEY (ColorID)
-    REFERENCES Color(ColorID)
+    REFERENCES Color(ColorID),
 FOREIGN KEY (ShapeID)
-    REFERENCES Shape(ShapeID)
+    REFERENCES Shape(ShapeID),
 FOREIGN KEY (GrowthRateID)
     REFERENCES GrowthRate(GrowthRateID)
