@@ -11,3 +11,7 @@
 
 !/localdata/pokemon-species/197.json
 !/localdata/pokemon-species/386.json
+
+# error file
+error.txt
+app.db
