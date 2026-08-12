@@ -41,21 +41,7 @@ const userMetadata string = `
 // Initialize Database as a database
 var database *sql.DB
 
-/*
-Note: Need colMetadata = "" if no metadata
-*/
-func generateTableQuery(tableName, colBody, colMetadata string) string {
-	if colMetadata != "" {
-		colMetadata = ", " + colMetadata
-	}
-	return fmt.Sprintf(`
-	CREATE TABLE IF NOT EXISTS %s (
-		%s %s
-	)
-	`, tableName, colBody, colMetadata)
-}
-
-func grabDBFlag(sqlFile string, flag string) (string, error) {
+func grabDBFlagParameter(sqlFile string, flag string) (string, error) {
 	flag = "-- @" + flag // e.g. -- @table
 
 	for _, line := range strings.Split(sqlFile, "\n") {
@@ -72,7 +58,52 @@ func grabDBFlag(sqlFile string, flag string) (string, error) {
 }
 
 func grabTableName(sqlFile string) (string, error) {
-	return grabDBFlag(sqlFile, "table")
+	return grabDBFlagParameter(sqlFile, "table")
+}
+
+func grabConstraints(sqlFile string) (body string, constraints string) {
+	flag := "-- @constraints"
+
+	lines := strings.Split(sqlFile, "\n")
+
+	for i, line := range lines {
+		line = strings.TrimSpace(line)
+
+		if strings.HasPrefix(line, flag) {
+			body := strings.TrimSpace(strings.Join(lines[:i], "\n"))
+			body = strings.TrimSuffix(body, ",") // remove trailing commas
+
+			rest := strings.TrimSpace(strings.TrimPrefix(line, flag))
+			if i+1 < len(lines) {
+				rest += "\n" + strings.Join(lines[i+1:], "\n")
+			}
+
+			return body, strings.TrimSpace(rest)
+		}
+	}
+
+	return strings.TrimSpace(sqlFile), ""
+}
+
+/*
+Note: Need colMetadata = "" if no metadata
+*/
+func generateTableQuery(tableName, colBody, colMetadata string) (string, error) {
+	colBody, colConstraint := grabConstraints(colBody)
+
+	// Add commas as necessary
+	if colMetadata != "" || colConstraint != "" {
+		colBody += ","
+	}
+	if colMetadata != "" && colConstraint != "" {
+		colMetadata += ","
+	}
+
+	return fmt.Sprintf(`
+	CREATE TABLE IF NOT EXISTS %s (
+		%s %s %s
+	)
+	`, tableName, colBody, colMetadata, colConstraint), nil
 }
 
 func databasePing(database *sql.DB) error {
@@ -145,11 +176,15 @@ func databaseCreateLookup(database *sql.DB) error {
 			return retError("D_04", "Failed to obtain table name from .sql file", err)
 		}
 
-		query := generateTableQuery(tableName, string(schemaColumns), userMetadata)
+		query, err := generateTableQuery(tableName, string(schemaColumns), userMetadata)
 		// No metadata for T00/00 DataOrigin specifically
 		if s == 0 {
-			query = generateTableQuery(tableName, string(schemaColumns), "")
+			query, err = generateTableQuery(tableName, string(schemaColumns), "")
 		}
+		if err != nil {
+			return retError("D_07", "Error when splitting body and constraint", err)
+		}
+
 		_, err = tx.Exec(query)
 		if err != nil {
 			writeError(query)
