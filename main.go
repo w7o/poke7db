@@ -33,15 +33,15 @@ import (
 	"github.com/davecgh/go-spew/spew"
 )
 
-var IS_DEV_BUILD bool = true // MUST BE SET TO FALSE FOR EVERY VERSION BUMP
+var IS_MAIN_BUILD bool = true // MUST BE SET TO FALSE FOR EVERY VERSION BUMP
 var SITE string = "https://pokeapi.co/api/v2/"
-var VERSION string = "0.0.9"
+var VERSION string = "0.0.10"
 var PROJECT_NAME string = "Poké7DB"
 
 func generateVersionNumber() {
 	// If not development build, don't print commit details
 	// %TODO pre-release / beta/ alpha / release tag support
-	if !IS_DEV_BUILD {
+	if IS_MAIN_BUILD {
 		VERSION = fmt.Sprintf("%s v%s", PROJECT_NAME, VERSION)
 		return
 	}
