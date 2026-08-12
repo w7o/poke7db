@@ -25,18 +25,25 @@ const nonUserMetadata string = `
 		REFERENCES DataOrigin(DataOriginID)
 `
 
-const userMetadata string = `
+const userMetadataMain string = `
 	originID INTEGER NOT NULL,
 	createdAt TEXT NOT NULL,
 	updatedAt TEXT,
 	enabled INTEGER NOT NULL DEFAULT 1 
 		CHECK (enabled IN (0, 1)),
-	ID INTEGER UNIQUE
-		CHECK (ID IS NOT NULL OR enabled = FALSE),
-
+`
+const userMetadataMainConstraints string = `
 	FOREIGN KEY (originID)
 		REFERENCES DataOrigin(DataOriginID)
 `
+
+const userMetadataID string = `
+	ID INTEGER UNIQUE
+		CHECK (ID IS NOT NULL OR enabled = FALSE),
+`
+
+const userMetadata string = userMetadataMain + userMetadataMainConstraints
+const userMetadataWithID string = userMetadataMain + userMetadataID + userMetadataMainConstraints
 
 // Initialize Database as a database
 var database *sql.DB
@@ -61,23 +68,45 @@ func grabDBFlagParameter(sqlFile string, flag string) (string, error) {
 		}
 	}
 
-	return "", fmt.Errorf("Missing %s metadata", flag)
+	return "", fmt.Errorf("D_19: Missing %s metadata", flag)
 }
 
-func grabTableName(fileContents string, fileFormat string) (string, error) {
-	var flag string
-	if fileFormat == "sql" {
-		flag = "-- @table"
-	} else { // if fileFormat == "csv" {
-		flag = "# @table"
+func fileFormatToFlag(flagText string, fileFormat string) string {
+	switch fileFormat {
+	case "sql":
+		return "-- @" + flagText
+	case "csv": // explicit
+		return "# @" + flagText
+	default:
+		return "# @" + flagText
 	}
+}
+
+// -- @table <tableName>
+func grabTableName(fileContents string, fileFormat string) (string, error) {
+	flag := fileFormatToFlag("table", fileFormat)
 	return grabDBFlagParameter(fileContents, flag)
 }
 
-func grabConstraints(sqlFile string) (body string, constraints string) {
+// -- @noID
+func checkIncludeID(fileContents string, fileFormat string) (bool, error) {
+	flag := fileFormatToFlag("noID", fileFormat)
+	_, err := grabDBFlagParameter(fileContents, flag)
+	if err != nil {
+		// D_19 reports that there's no flag found which is allowable
+		// Basically catching D_19 'exception'
+		if strings.HasPrefix(err.Error(), "D_19") {
+			return true, nil
+		}
+		return false, err
+	}
+	return false, nil
+}
+
+func grabConstraintsSQL(sqlFileContents string) (body string, constraints string) {
 	flag := "-- @constraints"
 
-	lines := strings.Split(sqlFile, "\n")
+	lines := strings.Split(sqlFileContents, "\n")
 
 	for i, line := range lines {
 		line = strings.TrimSpace(line)
@@ -95,14 +124,14 @@ func grabConstraints(sqlFile string) (body string, constraints string) {
 		}
 	}
 
-	return strings.TrimSpace(sqlFile), ""
+	return strings.TrimSpace(sqlFileContents), ""
 }
 
 /*
 Note: Need colMetadata = "" if no metadata
 */
 func generateTableQuery(tableName, colBody, colMetadata string) (string, error) {
-	colBody, colConstraint := grabConstraints(colBody)
+	colBody, colConstraint := grabConstraintsSQL(colBody)
 
 	// Add commas as necessary
 	if colMetadata != "" || colConstraint != "" {
@@ -166,6 +195,7 @@ func databaseCreateLookup(database *sql.DB) error {
 
 		matches := re_fileNameIndex.FindStringSubmatch(file.Name())
 
+		// matches[0] = entire matched STRING | matches[1] = capture group ([0-9]{2})
 		if len(matches) < 2 {
 			log.Printf("DB: Notice: Ignoring SQL file in lookup %s with incorrect filename format", file.Name())
 			continue
@@ -184,23 +214,34 @@ func databaseCreateLookup(database *sql.DB) error {
 		}
 
 		// obtain table name from sql file
-		tableName, err := grabTableName(string(schemaColumns))
+		tableName, err := grabTableName(string(schemaColumns), "sql")
 		if err != nil {
 			return retError("D_04", "Failed to obtain table name from .sql file", err)
 		}
 
-		query, err := generateTableQuery(tableName, string(schemaColumns), userMetadata)
-		// No metadata for T00/00 DataOrigin specifically
-		if s == 0 {
-			query, err = generateTableQuery(tableName, string(schemaColumns), "")
+		// obtain include ID bool from sql file
+		includeID, err := checkIncludeID(string(schemaColumns), "sql")
+		if err != nil {
+			return retError("D_22", "Failed to obtain include ID bool from .sql file", err)
 		}
+
+		var noMetadataCondition bool = s == 0
+		var metadata string = userMetadata
+		if noMetadataCondition {
+			metadata = ""
+		} else if includeID {
+			metadata = userMetadataWithID
+		}
+
+		query, err := generateTableQuery(tableName, string(schemaColumns), metadata)
+		// No metadata for T00/00 DataOrigin specifically
 		if err != nil {
 			return retError("D_07", "Error when splitting body and constraint", err)
 		}
 
 		_, err = tx.Exec(query)
 		if err != nil {
-			writeError(query)
+			writeLog(query)
 			message := fmt.Sprintf("Failed to create table %s from %s; \n\toffending query outputted to error.txt\n\t",
 				tableName, file.Name())
 			return retError("D_05", message, err)
@@ -239,7 +280,7 @@ func DatabaseInit(filepath string) (*sql.DB, error) {
 
 	// Creates lookup tables and fills them with required information
 	err = databaseCreateLookup(database)
-	if err := databaseCreateLookup(database); err != nil {
+	if err != nil {
 		return nil, err
 	}
 
