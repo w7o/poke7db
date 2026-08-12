@@ -9,6 +9,30 @@ import (
 	_ "modernc.org/sqlite"
 )
 
+const nonUserMetadata string = `
+	originID INTEGER NOT NULL,
+	importedAt TEXT NOT NULL,
+	checkedAt TEXT,
+	enabled INTEGER NOT NULL DEFAULT 1 
+		CHECK (enabled IN (0, 1)),
+
+	FOREIGN KEY (originID)
+		REFERENCES DataOrigin(DataOriginID)
+`
+
+const userMetadata string = `
+	originID INTEGER NOT NULL,
+	createdAt TEXT NOT NULL,
+	updatedAt TEXT,
+	enabled INTEGER NOT NULL DEFAULT 1 
+		CHECK (enabled IN (0, 1)),
+	ID INTEGER UNIQUE,
+		CHECK (ID IS NOT NULL OR enabled = FALSE)
+
+	FOREIGN KEY (originID)
+		REFERENCES DataOrigin(DataOriginID)
+`
+
 // Initialize Database as a database
 var database *sql.DB
 
