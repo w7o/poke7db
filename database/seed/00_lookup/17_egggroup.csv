@@ -1,3 +1,4 @@
+# @table EggGroup
 EggGroupID,Name,originID,Description
 0,Monster,3,NULL
 1,Human-Like,3,NULL

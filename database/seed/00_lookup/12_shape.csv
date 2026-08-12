@@ -1,3 +1,4 @@
+# @table Shape
 ShapeID,Name,originID,Description
 0,Quadruped,3,"Four-legged/quadruped"
 1,Humanoid,3,"Bipedal & tailless"

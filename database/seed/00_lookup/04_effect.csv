@@ -1,3 +1,4 @@
+# @table Effect
 EffectID,Name,originID,Description
 0,Paralysis,1,NULL
 1,Sleep,1,NULL

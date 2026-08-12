@@ -1,3 +1,4 @@
+# @table Color
 ColorID,Name,originID
 0,Red,1
 1,Blue,1

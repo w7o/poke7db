@@ -1,3 +1,4 @@
+# @table TimeOfDay
 TimeOfDayID,Name,originID,Description
 0,Day,3,NULL
 1,Night,3,NULL

@@ -1,3 +1,4 @@
+# @table DataOrigin
 DataOriginID,Name
 0,user
 1,PokéAPI

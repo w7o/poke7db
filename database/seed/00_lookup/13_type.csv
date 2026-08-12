@@ -1,3 +1,4 @@
+# @table Type
 TypeID,Name,originID,Description
 0,(none),1,NULL
 1,Normal,1,NULL

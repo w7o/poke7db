@@ -1,3 +1,4 @@
+# @table MoveCategory
 MoveCategoryID,Name,originID,Description
 0,DAMAGE,1,"damage"
 1,STATUS_CONDITION,1,"ailment"

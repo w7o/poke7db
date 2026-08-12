@@ -1,3 +1,4 @@
+# @table GrowthRate
 GrowthRateID,Name,originID,FormulaLatex,Description
 0,Medium Fast,3,"n^3",
 1,Erratic,3,"\begin{cases} n^3\frac{100-n}{50}, & n \le 50 \\ n^3\frac{150-n}{100}, & 50 < n \le 68 \\ n^3\frac{1911-10n}{1500}, & 68 < n \le 98 \\ n^3\frac{160-n}{100}, & n > 98 \end{cases}",

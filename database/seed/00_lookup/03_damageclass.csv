@@ -1,3 +1,4 @@
+# @table DamageClass
 DamageClassID,Name,originID,Description
 0,Physical,3,
 1,Special,3,

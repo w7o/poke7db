@@ -1,3 +1,4 @@
+# @table MoveFlag
 MoveFlagID,Name,originID,Description
 0,AllyAnim,2,"The move plays its animation when used on an ally."
 1,BypassSub,2,"Ignores a target's substitute."

@@ -42,8 +42,6 @@ const userMetadata string = `
 var database *sql.DB
 
 func grabDBFlagParameter(sqlFile string, flag string) (string, error) {
-	flag = "-- @" + flag // e.g. -- @table
-
 	for _, line := range strings.Split(sqlFile, "\n") {
 		line = strings.TrimSpace(line)
 
@@ -57,8 +55,14 @@ func grabDBFlagParameter(sqlFile string, flag string) (string, error) {
 	return "", fmt.Errorf("Missing %s metadata", flag)
 }
 
-func grabTableName(sqlFile string) (string, error) {
-	return grabDBFlagParameter(sqlFile, "table")
+func grabTableName(fileContents string, fileFormat string) (string, error) {
+	var flag string
+	if fileFormat == "sql" {
+		flag = "-- @table"
+	} else { // if fileFormat == "csv" {
+		flag = "# @table"
+	}
+	return grabDBFlagParameter(fileContents, flag)
 }
 
 func grabConstraints(sqlFile string) (body string, constraints string) {

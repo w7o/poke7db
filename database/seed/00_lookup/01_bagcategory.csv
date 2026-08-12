@@ -1,3 +1,4 @@
+# @table BagCategory
 BagCategoryID,Name,originID,Description
 0,Miscellaneous,1,"Contains all items not in other pockets"
 1,Medicine,1,"Contains all healing and permanent stat-enhancing medicine."

@@ -1,4 +1,5 @@
-MultiHitProfileID,Hit,Weight,originID
+# @table MultiHitDistribution
+MultiHitProfileID,HitNumber,HitWeight,originID
 0,2,7,3
 0,3,7,3
 0,4,3,3

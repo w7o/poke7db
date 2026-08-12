@@ -1,3 +1,4 @@
+# @table Target
 TargetID,Name,originID,Description
 0,Move-Specific,1,NULL
 1,Selected Target,1,NULL

@@ -1,3 +1,4 @@
+# @table LearnMethod
 LearnMethodID,Name,originID,Description
 0,Level Up,1,NULL
 1,Egg Move,1,NULL
