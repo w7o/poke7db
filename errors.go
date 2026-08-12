@@ -42,7 +42,8 @@ func writeLog(text string) {
 }
 
 func clearErrorFile() {
-	header := "THIS FILE PROVIDES CONTEXT TO MESSAGES & ERRORS DISPLAYED IN THE CONSOLE\n\n"
+	header := fmt.Sprintf("%s\nTHIS FILE PROVIDES CONTEXT TO MESSAGES & ERRORS DISPLAYED IN THE CONSOLE\n\n",
+		VERSION)
 
 	err := os.WriteFile("log.txt", []byte(header), 0666)
 	if err != nil {

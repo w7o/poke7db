@@ -33,9 +33,9 @@ import (
 	"github.com/davecgh/go-spew/spew"
 )
 
-var IS_MAIN_BUILD bool = false // MUST BE SET TO FALSE FOR EVERY VERSION BUMP
+var IS_MAIN_BUILD bool = true // MUST BE SET TO FALSE FOR EVERY VERSION BUMP
 var SITE string = "https://pokeapi.co/api/v2/"
-var VERSION string = "0.0.10"
+var VERSION string = "0.1.0"
 var PROJECT_NAME string = "Poké7DB"
 
 func generateVersionNumber() {
@@ -76,10 +76,10 @@ func generateVersionNumber() {
 }
 
 func main() {
-	clearErrorFile()
-
 	generateVersionNumber()
 	fmt.Println(VERSION)
+
+	clearErrorFile()
 
 	// if $env:P7D_ENV="dev" then use locally stored instead
 
@@ -111,6 +111,9 @@ func main() {
 	spew.Dump(data)
 
 	fmt.Printf("\nFinished request on %s\n\n%s\n", SITE, VERSION)
+
+	DatabaseQuery(database)
+	fmt.Printf("DATABASE EXAMPLE OUTPUT TO log.txt")
 }
 
 /* important commands:

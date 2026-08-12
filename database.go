@@ -446,6 +446,58 @@ func databaseSeedLookup(database *sql.DB) error {
 	return tx.Commit()
 }
 
+func stringRows(rows *sql.Rows) (string, error) {
+	columns, err := rows.Columns()
+	if err != nil {
+		return "", err
+	}
+
+	// the shit i need to do to just print out a query dude
+	var buffer bytes.Buffer
+
+	t := table.NewWriter()
+	t.SetOutputMirror(&buffer)
+	var header table.Row
+	for _, column := range columns {
+		header = append(header, column)
+	}
+
+	t.AppendHeader(header)
+
+	for rows.Next() {
+		// since Scan requires pointers, create fixed length lists to support variable pointers
+		values := make([]any, len(columns))
+		pointers := make([]any, len(columns))
+		for i := range values {
+			pointers[i] = &values[i]
+		}
+
+		err := rows.Scan(pointers...)
+		if err != nil {
+			return "", err
+		}
+
+		var row table.Row
+		for _, value := range values {
+			if value == nil {
+				row = append(row, "NULL")
+			} else {
+				row = append(row, value)
+			}
+		}
+		t.AppendRow(row)
+	}
+
+	err = rows.Err()
+	if err != nil {
+		return "", err
+	}
+
+	t.Render()
+
+	return buffer.String(), nil
+}
+
 /*
 Initializes or opens the database.
 If initializing:
@@ -488,4 +540,20 @@ func DatabaseInit(filepath string) (*sql.DB, error) {
 	fmt.Println("SQLite database initialized")
 
 	return database, nil
+}
+
+func DatabaseQuery(database *sql.DB) error {
+	rows, err := database.Query("SELECT * FROM MoveFlag")
+	if err != nil {
+		return err
+	}
+
+	defer rows.Close()
+	ret, err := stringRows(rows)
+	if err != nil {
+		return err
+	}
+
+	writeLog(ret)
+	return nil
 }
