@@ -102,7 +102,8 @@ func main() {
 	}
 	defer database.Close()
 
-	data, err := poke_query(pokemonID)
+	var pokemonData Pokemon
+	pokemonData, err = poke_query(pokemonID)
 
 	if err != nil {
 		log.Fatal(err.Error())
@@ -114,7 +115,7 @@ func main() {
 	fmt.Printf("DATABASE EXAMPLE OUTPUT TO logDB.txt\n")
 
 	var dataString bytes.Buffer
-	spew.Fdump(&dataString, data)
+	spew.Fdump(&dataString, pokemonData)
 
 	resetMessageFile("logQuery", "logQuery.txt")
 	writeFile(dataString.String(), "logQuery.txt")
@@ -125,6 +126,7 @@ func main() {
 		return
 	}
 
+	// err := DatabaseImport(pokemonData)
 }
 
 /* important commands:
