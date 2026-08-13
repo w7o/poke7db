@@ -1,4 +1,5 @@
 -- @table PokemonEggGroup
+-- @noID
 PokemonSpeciesID INTEGER NOT NULL,
 Slot INTEGER NOT NULL
     CHECK (Slot >= 0),

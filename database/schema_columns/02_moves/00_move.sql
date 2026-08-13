@@ -13,7 +13,7 @@ Power INTEGER NOT NULL
     CHECK (Power >= 0),
 DamageClassID INTEGER NOT NULL,
 TargetID INTEGER NOT NULL
-    CHECK (Target >= 0),
+    CHECK (TargetID >= 0),
 CritBonus INTEGER NOT NULL
     CHECK (CritBonus >= 0),
 MultiHitTypeID INTEGER NOT NULL,

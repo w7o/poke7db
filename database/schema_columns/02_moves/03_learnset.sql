@@ -1,4 +1,5 @@
 -- @table Learnset
+-- @noID
 PokemonFormID INTEGER NOT NULL,
 MoveID INTEGER NOT NULL,
 LearnMethodID INTEGER NOT NULL,
@@ -7,7 +8,7 @@ Level INTEGER
 LearnDescription TEXT NOT NULL,
 
 -- @constraints
-PRIMARY KEY (PokemonFormID, MoveID, LearnMethod, Level),
+PRIMARY KEY (PokemonFormID, MoveID, LearnMethodID, Level),
 FOREIGN KEY (PokemonFormID)
     REFERENCES PokemonForm(PokemonFormID),
 FOREIGN KEY (MoveID)

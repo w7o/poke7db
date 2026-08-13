@@ -1,4 +1,5 @@
 -- @table PokemonType
+-- @noID
 PokemonFormID INTEGER NOT NULL,
 Slot INTEGER NOT NULL
     CHECK (Slot >= 0),

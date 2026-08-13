@@ -7,7 +7,7 @@ BaseHappiness INTEGER NOT NULL
 CaptureRate	INTEGER NOT NULL
     CHECK (CaptureRate >= 0),
 GrowthRateID INTEGER NOT NULL
-    CHECK (GrowthRate >= 0),
+    CHECK (GrowthRateID >= 0),
 GenderRate INTEGER NOT NULL
     CHECK (GenderRate >= -1),
 HatchCounter INTEGER NOT NULL

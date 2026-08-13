@@ -1,4 +1,5 @@
 -- @table MoveEffect
+-- @noID
 MoveID INTEGER NOT NULL,
 EffectOrder INTEGER NOT NULL
     CHECK (EffectOrder >= 1),
