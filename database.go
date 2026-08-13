@@ -561,8 +561,8 @@ func databaseCreateMain(database *sql.DB) error {
 			schemaUserColumns, err := os.ReadFile(filepath.Join(schemaUserDir, dirName, file.Name()))
 			if err != nil {
 				if errors.Is(err, os.ErrNotExist) {
-					writeWarning(fmt.Sprintf("DB: Detected table %s has no user table equivalent",
-						dirName+file.Name()))
+					writeWarning(fmt.Sprintf("DB: Detected that table %s has no defined user-specific columns",
+						dirName+"/"+file.Name()))
 				} else {
 					return retError("D_28", "Failed to obtain schemaUserDir .sql file", err)
 				}
