@@ -41,6 +41,10 @@ func writeLog(text string) {
 	}
 }
 
+func writeWarning(text string) {
+	writeLog("WARNING: " + text)
+}
+
 func clearErrorFile() {
 	header := fmt.Sprintf("%s\nTHIS FILE PROVIDES CONTEXT TO MESSAGES & ERRORS DISPLAYED IN THE CONSOLE\n\n",
 		VERSION)
