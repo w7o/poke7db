@@ -1,1 +1,1 @@
-FlavorText  TEXT -- ability in-game description
+FlavorText  TEXT, -- ability in-game description

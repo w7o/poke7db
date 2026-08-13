@@ -1,1 +1,1 @@
-FlavorText  TEXT -- in-game move description text
+FlavorText  TEXT, -- in-game move description text

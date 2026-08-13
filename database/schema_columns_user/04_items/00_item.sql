@@ -1,1 +1,1 @@
-ItemDescription TEXT -- in-game item description
+ItemDescription TEXT, -- in-game item description
