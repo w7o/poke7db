@@ -8,6 +8,6 @@ EggGroupID INTEGER NOT NULL,
 -- @constraints
 PRIMARY KEY (PokemonSpeciesID, Slot),
 FOREIGN KEY (PokemonSpeciesID)
-    REFERENCES PokemonSpecies(PokemonSpeciesID)
+    REFERENCES PokemonSpecies(PokemonSpeciesID),
 FOREIGN KEY (EggGroupID)
     REFERENCES EggGroup(EggGroupID)

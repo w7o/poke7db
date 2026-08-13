@@ -1,0 +1,8 @@
+# @table Stat
+StatID,Name,Description
+0,HP,
+1,Attack,
+2,Defense,
+3,Special Attack,
+4,Special Defense,
+5,Speed
