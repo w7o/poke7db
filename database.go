@@ -402,6 +402,9 @@ func databaseCreateLookup(database *sql.DB) error {
 		if err != nil {
 			return retError("D_02", "Failed to extract filename index number", err)
 		}
+		if s == -1 {
+			continue
+		}
 
 		// obtain the sql file
 		schemaColumns, err := os.ReadFile(filepath.Join(dir, file.Name()))
@@ -449,6 +452,47 @@ func databaseCreateLookup(database *sql.DB) error {
 	return tx.Commit()
 }
 
+func clearLookupEntries(tx *sql.Tx, files []os.DirEntry) error {
+	for i := len(files) - 1; i >= 0; i-- {
+		file := files[i]
+		if file.IsDir() {
+			continue
+		}
+		if filepath.Ext(file.Name()) != ".csv" {
+			continue
+		}
+
+		// check if valid file
+		s, err := extractFileIndexNumber(file.Name())
+		if err != nil {
+			return retError("D_26", "Failed to extract file index number", err)
+		}
+		if s == -1 {
+			continue
+		}
+
+		var seedDir string = "./database/seed/00_lookup"
+		csvPath := filepath.Join(seedDir, file.Name())
+		csv, err := os.ReadFile(csvPath)
+		if err != nil {
+			return retError("D_35", "Failed to read CSV file", err)
+		}
+
+		tableName, err := grabTableName(string(csv), "csv")
+		if err != nil {
+			return retError("D_36", "Failed to read CSV table name", err)
+		}
+
+		clearQuery := fmt.Sprintf("DELETE FROM %s", tableName)
+		_, err = tx.Exec(clearQuery)
+		if err != nil {
+			return retError("D_37", fmt.Sprintf("Failed to clear table %s",
+				tableName), err)
+		}
+	}
+	return nil
+}
+
 func databaseSeedLookup(database *sql.DB) error {
 	log.Print("DB: Seeding lookup tables")
 	err := databasePing(database)
@@ -470,7 +514,11 @@ func databaseSeedLookup(database *sql.DB) error {
 		return retError("D_09", "Reading seed lookup directory failed", err)
 	}
 
-	var re_fileNameIndex *regexp.Regexp = regexp.MustCompile("^([0-9]{2})_.+$")
+	//@USER make this a setting/optional at some point
+	err = clearLookupEntries(tx, files)
+	if err != nil {
+		return err
+	}
 
 	for _, file := range files {
 		if file.IsDir() {
@@ -481,17 +529,12 @@ func databaseSeedLookup(database *sql.DB) error {
 		}
 		sqlFileName := strings.TrimSuffix(file.Name(), filepath.Ext(file.Name())) + ".sql"
 
-		matches := re_fileNameIndex.FindStringSubmatch(file.Name())
-
-		if len(matches) < 2 {
-			log.Printf("DB: Notice: Ignoring CSV file in lookup %s with incorrect filename format", file.Name())
-			continue
-		}
-
-		// convert obtained index to int
-		s, err := strconv.Atoi(matches[1])
+		s, err := extractFileIndexNumber(file.Name())
 		if err != nil {
 			return retError("D_10", "Failed to convert an index to int", err)
+		}
+		if s == -1 {
+			continue
 		}
 
 		// obtain the csv file

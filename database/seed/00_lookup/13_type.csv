@@ -19,4 +19,5 @@ TypeID,Name,originID,Description
 16,Dragon,1,NULL
 17,Dark,1,NULL
 18,Fairy,1,NULL
-127,Stellar,1,NULL
+126,Stellar,1,NULL
+127,???,1,NULL

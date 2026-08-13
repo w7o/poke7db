@@ -26,7 +26,7 @@ FOREIGN KEY (MethodID)
 FOREIGN KEY (ItemID)
     REFERENCES Item(ItemID),
 FOREIGN KEY (TimeOfDayID)
-    REFERENCES TimeOfDay(TimeID),
+    REFERENCES TimeOfDay(TimeOfDayID),
 FOREIGN KEY (KnownMoveID)
     REFERENCES Move(MoveID),
 FOREIGN KEY (KnownMoveTypeID)
