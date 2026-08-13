@@ -65,6 +65,24 @@ func strToAny(values []string) []any {
 	return result
 }
 
+func extractFileIndexNumber(filename string) (int, error) {
+	var reFileNameIndex *regexp.Regexp = regexp.MustCompile("^([0-9]{2})_.+$")
+
+	matches := reFileNameIndex.FindStringSubmatch(filename)
+	// matches[0] = entire matched STRING | matches[1] = capture group ([0-9]{2})
+	if len(matches) < 2 {
+		log.Printf("DB: Notice: Ignoring SQL file in lookup %s with incorrect filename format", filename)
+		return -1, nil
+	}
+
+	// convert obtained index to int
+	s, err := strconv.Atoi(matches[1])
+	if err != nil {
+		return -1, err
+	}
+	return s, nil
+}
+
 func grabDBFlagParameter(sqlFile string, flag string) (string, error) {
 	for _, line := range strings.Split(sqlFile, "\n") {
 		line = strings.TrimSpace(line)
@@ -284,6 +302,60 @@ func seedTable(tx *sql.Tx, csvPath string, sqlPath string, tableIndex int, times
 	return nil
 }
 
+func stringRows(rows *sql.Rows) (string, error) {
+	columns, err := rows.Columns()
+	if err != nil {
+		return "", err
+	}
+
+	// the shit i need to do to just print out a query dude
+	var buffer bytes.Buffer
+
+	t := table.NewWriter()
+	t.SetOutputMirror(&buffer)
+	var header table.Row
+	for _, column := range columns {
+		header = append(header, column)
+	}
+
+	// Table header
+	t.AppendHeader(header)
+
+	for rows.Next() {
+		// since Scan requires pointers, create fixed length lists to support variable pointers
+		values := make([]any, len(columns))
+		pointers := make([]any, len(columns))
+		for i := range values {
+			pointers[i] = &values[i]
+		}
+
+		// scans rows into the pointers, which themselves point to a table of values
+		err := rows.Scan(pointers...)
+		if err != nil {
+			return "", err
+		}
+
+		var row table.Row
+		for _, value := range values {
+			if value == nil {
+				row = append(row, "NULL")
+			} else {
+				row = append(row, value)
+			}
+		}
+		t.AppendRow(row)
+	}
+
+	err = rows.Err()
+	if err != nil {
+		return "", err
+	}
+
+	t.Render()
+
+	return buffer.String(), nil
+}
+
 func databasePing(database *sql.DB) error {
 	// Test that the database works
 	err := database.Ping()
@@ -310,16 +382,13 @@ func databaseCreateLookup(database *sql.DB) error {
 	}
 	defer tx.Rollback()
 
-	// Create the rest of the lookup tables
+	// Create the lookup tables
 	var dir string = "./database/schema_columns/00_lookup"
 	// Golang ReadDir already sorts in alphabetical order
 	files, err := os.ReadDir(dir)
 	if err != nil {
 		return retError("D_01", "", err)
 	}
-
-	// regex object to grab filename index numbers
-	var re_fileNameIndex *regexp.Regexp = regexp.MustCompile("^([0-9]{2})_.+$")
 
 	for _, file := range files {
 		if file.IsDir() {
@@ -329,18 +398,9 @@ func databaseCreateLookup(database *sql.DB) error {
 			continue
 		}
 
-		matches := re_fileNameIndex.FindStringSubmatch(file.Name())
-
-		// matches[0] = entire matched STRING | matches[1] = capture group ([0-9]{2})
-		if len(matches) < 2 {
-			log.Printf("DB: Notice: Ignoring SQL file in lookup %s with incorrect filename format", file.Name())
-			continue
-		}
-
-		// convert obtained index to int
-		s, err := strconv.Atoi(matches[1])
+		s, err := extractFileIndexNumber(file.Name())
 		if err != nil {
-			return retError("D_02", "Failed to convert an index to int", err)
+			return retError("D_02", "Failed to extract filename index number", err)
 		}
 
 		// obtain the sql file
@@ -361,7 +421,10 @@ func databaseCreateLookup(database *sql.DB) error {
 			return retError("D_22", "Failed to obtain include ID bool from .sql file", err)
 		}
 
+		// set No Metadata Condition
 		var noMetadataCondition bool = s == 0
+
+		// set correct metadata value
 		var metadata string = userMetadata
 		if noMetadataCondition {
 			metadata = ""
@@ -446,58 +509,120 @@ func databaseSeedLookup(database *sql.DB) error {
 	return tx.Commit()
 }
 
-func stringRows(rows *sql.Rows) (string, error) {
-	columns, err := rows.Columns()
+func databaseCreateMain(database *sql.DB) error {
+	log.Print("DB: Creating main tables")
+	err := databasePing(database)
 	if err != nil {
-		return "", err
+		return err
 	}
 
-	// the shit i need to do to just print out a query dude
-	var buffer bytes.Buffer
+	tx, err := database.Begin()
+	if err != nil {
+		return retError("D_23", "Transaction start fail", err)
+	}
+	defer tx.Rollback()
 
-	t := table.NewWriter()
-	t.SetOutputMirror(&buffer)
-	var header table.Row
-	for _, column := range columns {
-		header = append(header, column)
+	var schemaDir string = "./database/schema_columns"
+	var schemaUserDir string = "./database/schema_columns_user"
+
+	files, err := os.ReadDir(schemaDir)
+	if err != nil {
+		return retError("D_24", "Read schema col dir failed", err)
 	}
 
-	// Table header
-	t.AppendHeader(header)
-
-	for rows.Next() {
-		// since Scan requires pointers, create fixed length lists to support variable pointers
-		values := make([]any, len(columns))
-		pointers := make([]any, len(columns))
-		for i := range values {
-			pointers[i] = &values[i]
-		}
-
-		// scans rows into the pointers, which themselves point to a table of values
-		err := rows.Scan(pointers...)
-		if err != nil {
-			return "", err
-		}
-
-		var row table.Row
-		for _, value := range values {
-			if value == nil {
-				row = append(row, "NULL")
-			} else {
-				row = append(row, value)
+	var dirNames []string
+	for _, dir := range files {
+		if dir.IsDir() {
+			if dir.Name() != "00_lookup" {
+				dirNames = append(dirNames, dir.Name())
 			}
 		}
-		t.AppendRow(row)
 	}
+	for _, dirName := range dirNames {
+		files, err := os.ReadDir(filepath.Join(schemaDir, dirName))
+		if err != nil {
+			return retError("D_25", "Failed to lookup file", err)
+		}
+		for _, file := range files {
+			if file.IsDir() {
+				continue
+			}
+			if filepath.Ext(file.Name()) != ".sql" {
+				continue
+			}
 
-	err = rows.Err()
-	if err != nil {
-		return "", err
+			// obtain sql file
+			schemaColumns, err := os.ReadFile(filepath.Join(schemaDir, dirName, file.Name()))
+			if err != nil {
+				return retError("D_27", "Failed to obtain schemaDir .sql file", err)
+			}
+
+			// obtain user file if it exists
+			schemaUserColumns, err := os.ReadFile(filepath.Join(schemaUserDir, dirName, file.Name()))
+			if err != nil {
+				if errors.Is(err, os.ErrNotExist) {
+					writeWarning(fmt.Sprintf("DB: Detected table %s has no user table equivalent",
+						dirName+file.Name()))
+				} else {
+					return retError("D_28", "Failed to obtain schemaUserDir .sql file", err)
+				}
+			}
+
+			// obtain table name
+			tableName, err := grabTableName(string(schemaColumns), "sql")
+			if err != nil {
+				return retError("D_29", "Failed to obtain table name from .sql file", err)
+			}
+
+			// obtain include ID bool
+			includeID, err := checkIncludeID(string(schemaColumns), "sql")
+			if err != nil {
+				return retError("D_30", "Failed to obtain include ID bool from .sql file", err)
+			}
+
+			// set correct metadata value
+			var metadata string = userMetadata
+			if includeID {
+				metadata = userMetadataWithID
+			}
+
+			// create non-user table
+			nonUserQuery, err := generateTableQuery(tableName, string(schemaColumns), nonUserMetadata)
+			if err != nil {
+				// @TODO: impossible to reach
+				return retError("D_31", "Failed to generate non-user table query", err)
+			}
+
+			// create user table
+			userColumns := string(schemaColumns)
+			if len(schemaUserColumns) > 0 {
+				sUCBody, sUCConstraints := grabConstraintsSQL(string(schemaUserColumns))
+				userColumns = sUCBody + "\n" + userColumns + sUCConstraints
+			}
+			userQuery, err := generateTableQuery(tableName, userColumns, metadata)
+			if err != nil {
+				// @TODO: impossible to reach
+				return retError("D_32", "Failed to generate user table query", err)
+			}
+
+			_, err = tx.Exec(nonUserQuery)
+			if err != nil {
+				writeLog(nonUserQuery)
+				message := fmt.Sprintf("Failed to create non-user table %s from %s; \n\toffending query outputted to error.txt\n\t",
+					tableName, file.Name())
+				return retError("D_33", message, err)
+			}
+
+			_, err = tx.Exec(userQuery)
+			if err != nil {
+				writeLog(fmt.Sprintf("%s\n\n%s", userColumns, userQuery))
+				message := fmt.Sprintf("Failed to create user table %s from %s; \n\toffending query outputted to error.txt\n\t",
+					tableName, file.Name())
+				return retError("D_34", message, err)
+			}
+		}
 	}
-
-	t.Render()
-
-	return buffer.String(), nil
+	return tx.Commit()
 }
 
 /*
@@ -535,6 +660,11 @@ func DatabaseInit(filepath string) (*sql.DB, error) {
 	}
 
 	err = databaseSeedLookup(database)
+	if err != nil {
+		return nil, err
+	}
+
+	err = databaseCreateMain(database)
 	if err != nil {
 		return nil, err
 	}
