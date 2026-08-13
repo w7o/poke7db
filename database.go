@@ -370,7 +370,7 @@ Index 00 is hardcoded to not have metadata applied
 */
 func databaseCreateLookup(database *sql.DB) error {
 	// Lookup tables have the same metadata as User Main tables
-	log.Print("DB: Creating lookup tables")
+	writeLogAndConsole("DB: Creating lookup tables")
 	err := databasePing(database)
 	if err != nil {
 		return err
@@ -494,7 +494,7 @@ func clearLookupEntries(tx *sql.Tx, files []os.DirEntry) error {
 }
 
 func databaseSeedLookup(database *sql.DB) error {
-	log.Print("DB: Seeding lookup tables")
+	writeLogAndConsole("DB: Seeding lookup tables")
 	err := databasePing(database)
 	if err != nil {
 		return err
@@ -553,7 +553,7 @@ func databaseSeedLookup(database *sql.DB) error {
 }
 
 func databaseCreateMain(database *sql.DB) error {
-	log.Print("DB: Creating main tables")
+	writeLogAndConsole("DB: Creating main tables")
 	err := databasePing(database)
 	if err != nil {
 		return err
@@ -707,16 +707,19 @@ func DatabaseInit(filepath string) (*sql.DB, error) {
 	if err != nil {
 		return nil, err
 	}
+	writeLog("DB: Created lookup tables")
 
 	err = databaseSeedLookup(database)
 	if err != nil {
 		return nil, err
 	}
+	writeLog("DB: Seeded lookup tables")
 
 	err = databaseCreateMain(database)
 	if err != nil {
 		return nil, err
 	}
+	writeLog("DB: Created main tables")
 
 	fmt.Println("SQLite database initialized")
 
@@ -738,6 +741,7 @@ func SampleDatabaseQuery(database *sql.DB) error {
 		return err
 	}
 
-	writeLog(ret)
+	resetMessageFile("logDB", "logDB.txt")
+	writeFile(ret, "logDB.txt")
 	return nil
 }

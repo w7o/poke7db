@@ -34,9 +34,9 @@ import (
 	"github.com/davecgh/go-spew/spew"
 )
 
-var IS_MAIN_BUILD bool = false // MUST BE SET TO FALSE FOR EVERY VERSION BUMP
+var IS_MAIN_BUILD bool = true // MUST BE SET TO FALSE FOR EVERY VERSION BUMP
 var SITE string = "https://pokeapi.co/api/v2/"
-var VERSION string = "0.1.3"
+var VERSION string = "0.1.4"
 var PROJECT_NAME string = "Poké7DB"
 
 func generateVersionNumber() {
@@ -80,7 +80,7 @@ func main() {
 	generateVersionNumber()
 	fmt.Println(VERSION)
 
-	clearErrorFile()
+	resetLogFile()
 
 	// if $env:P7D_ENV="dev" then use locally stored instead
 
@@ -111,13 +111,15 @@ func main() {
 	fmt.Printf("\nFinished request on %s\n\n%s\n", SITE, VERSION)
 
 	SampleDatabaseQuery(database)
-	fmt.Printf("DATABASE EXAMPLE OUTPUT TO log.txt\n")
+	fmt.Printf("DATABASE EXAMPLE OUTPUT TO logDB.txt\n")
 
 	var dataString bytes.Buffer
 	spew.Fdump(&dataString, data)
-	writeLog(dataString.String())
 
-	fmt.Printf("POKéAPI OUTPUT TO log.txt")
+	resetMessageFile("logQuery", "logQuery.txt")
+	writeFile(dataString.String(), "logQuery.txt")
+
+	fmt.Printf("POKéAPI OUTPUT TO logQuery.txt")
 
 	if os.Getenv("P7D_WRITE_DB") == "0" {
 		return

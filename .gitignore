@@ -13,7 +13,7 @@
 !/localdata/pokemon-species/386.json
 
 # log file
-log.txt
+*.txt
 
 # database
 *.db
