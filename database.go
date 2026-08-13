@@ -586,20 +586,24 @@ func databaseCreateMain(database *sql.DB) error {
 				metadata = userMetadataWithID
 			}
 
-			// create non-user table
+			// create non-user table query
 			nonUserQuery, err := generateTableQuery(tableName, string(schemaColumns), nonUserMetadata)
 			if err != nil {
 				// @TODO: impossible to reach
 				return retError("D_31", "Failed to generate non-user table query", err)
 			}
 
-			// create user table
+			// PokemonFormUser, PokemonSpeciesUser, etc.
+			var userTableSuffix string = "User"
+			var userTableName string = tableName + userTableSuffix
+
+			// create user table query
 			userColumns := string(schemaColumns)
 			if len(schemaUserColumns) > 0 {
 				sUCBody, sUCConstraints := grabConstraintsSQL(string(schemaUserColumns))
 				userColumns = sUCBody + "\n" + userColumns + sUCConstraints
 			}
-			userQuery, err := generateTableQuery(tableName, userColumns, metadata)
+			userQuery, err := generateTableQuery(userTableName, userColumns, metadata)
 			if err != nil {
 				// @TODO: impossible to reach
 				return retError("D_32", "Failed to generate user table query", err)
@@ -609,7 +613,8 @@ func databaseCreateMain(database *sql.DB) error {
 			if err != nil {
 				writeLog(nonUserQuery)
 				message := fmt.Sprintf("Failed to create non-user table %s from %s; \n\toffending query outputted to error.txt\n\t",
-					tableName, file.Name())
+					tableName,
+					file.Name())
 				return retError("D_33", message, err)
 			}
 
@@ -617,7 +622,8 @@ func databaseCreateMain(database *sql.DB) error {
 			if err != nil {
 				writeLog(fmt.Sprintf("%s\n\n%s", userColumns, userQuery))
 				message := fmt.Sprintf("Failed to create user table %s from %s; \n\toffending query outputted to error.txt\n\t",
-					tableName, file.Name())
+					userTableName,
+					file.Name())
 				return retError("D_34", message, err)
 			}
 		}
