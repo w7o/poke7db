@@ -683,7 +683,7 @@ func DatabaseInit(filepath string) (*sql.DB, error) {
 /*
 temporary query
 */
-func DatabaseQuery(database *sql.DB) error {
+func SampleDatabaseQuery(database *sql.DB) error {
 	rows, err := database.Query("SELECT * FROM MoveFlag")
 	if err != nil {
 		return err

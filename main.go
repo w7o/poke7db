@@ -24,6 +24,7 @@ make run-dev ID=<pokemon>
 package main
 
 import (
+	"bytes"
 	"fmt"
 	"log"
 	"os"
@@ -107,13 +108,21 @@ func main() {
 		log.Fatal(err.Error())
 	}
 
-	// fmt.Printf("%+v\n", data)
-	spew.Dump(data)
-
 	fmt.Printf("\nFinished request on %s\n\n%s\n", SITE, VERSION)
 
-	DatabaseQuery(database)
-	fmt.Printf("DATABASE EXAMPLE OUTPUT TO log.txt")
+	SampleDatabaseQuery(database)
+	fmt.Printf("DATABASE EXAMPLE OUTPUT TO log.txt\n")
+
+	var dataString bytes.Buffer
+	spew.Fdump(&dataString, data)
+	writeLog(dataString.String())
+
+	fmt.Printf("POKéAPI OUTPUT TO log.txt")
+
+	if os.Getenv("P7D_WRITE_DB") == "0" {
+		return
+	}
+
 }
 
 /* important commands:
