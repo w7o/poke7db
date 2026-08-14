@@ -110,6 +110,7 @@ func pokemonSpeciesToTS(data APIPokemonSpecies) (PokemonSpeciesDBEntry, error) {
 		CaptureRate:      int(data.CaptureRate),
 		GrowthRateID:     growthRateID,
 		HatchCounter:     data.HatchCounter,
+		GenderRate:       int(data.GenderRate) * 2, // frac out of 16 in DB
 		IsMythical:       boolToInt(data.IsMythical),
 		IsLegendary:      boolToInt(data.IsLegendary),
 	}, nil
@@ -157,16 +158,26 @@ func pokemonEVYieldToTS(data StatBlock, pokemonFormID int) ([]PokemonEVYieldDBEn
 	return entry, nil
 }
 
+func optionalMapI2I(id int, mapping map[int]int) int {
+	mappedID, ok := mapping[id]
+	if ok {
+		return mappedID
+	}
+	return id
+}
+
 // pass in Pokemon.Types
 func pokemonTypesToTS(data []PokemonType, pokemonFormID int) ([]PokemonTypeDBEntry, error) {
 	entry := []PokemonTypeDBEntry{}
 	for _, d := range data {
+		typeID := extractIDfromURL(d.Type.URL, "E_04")
+		typeID = optionalMapI2I(typeID, mapType)
+
 		entry = append(entry,
 			PokemonTypeDBEntry{
 				PokemonFormID: pokemonFormID,
 				Slot:          d.Slot,
-				TypeID:        extractIDfromURL(d.Type.URL, "E_04") + 1,
-				// pokeapi is 1-indexed, db is 0-indexed
+				TypeID:        typeID,
 			})
 	}
 

@@ -36,7 +36,7 @@ import (
 
 var IS_MAIN_BUILD bool = true // MUST BE SET TO FALSE FOR EVERY VERSION BUMP
 var SITE string = "https://pokeapi.co/api/v2/"
-var VERSION string = "0.1.4"
+var VERSION string = "0.1.5"
 var PROJECT_NAME string = "Poké7DB"
 
 func generateVersionNumber() {
@@ -117,10 +117,10 @@ func main() {
 	var dataString bytes.Buffer
 	spew.Fdump(&dataString, pokemonData)
 
-	resetMessageFile("logQuery", "logQuery.txt")
-	writeFile(dataString.String(), "logQuery.txt")
+	resetMessageFile("Other logs", "logOther.txt")
+	writeFile(dataString.String(), "logOther.txt")
 
-	fmt.Printf("API OUTPUT TO logQuery.txt")
+	fmt.Printf("API OUTPUT TO logOther.txt")
 	if os.Getenv("P7D_WRITE_DB") == "0" {
 		return
 	}
@@ -130,6 +130,7 @@ func main() {
 		log.Fatal(err)
 	}
 
+	resetMessageFile("logQuery", "logQuery.txt")
 	for _, item := range info {
 		spew.Fdump(&dataString, item)
 		writeFile(dataString.String(), "logQuery.txt")

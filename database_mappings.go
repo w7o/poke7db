@@ -42,3 +42,8 @@ var mapShape = map[int]int{
 	1:  12, // Ball
 	11: 13, // Multi-Body
 }
+
+var mapType = map[int]int{
+	// Values from 1 - 18 are the same value
+	19: 127, // Stellar
+}
