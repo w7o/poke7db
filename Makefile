@@ -18,7 +18,7 @@ run-dev:
 
 # run with database export
 super-run-dev:
-	$(MAKE) run-dev DB=1
+	$(MAKE) run-dev WRITE_DB=1
 
 server:
 	go run ./server/.

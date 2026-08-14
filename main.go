@@ -120,13 +120,22 @@ func main() {
 	resetMessageFile("logQuery", "logQuery.txt")
 	writeFile(dataString.String(), "logQuery.txt")
 
-	fmt.Printf("POKéAPI OUTPUT TO logQuery.txt")
-
+	fmt.Printf("API OUTPUT TO logQuery.txt")
 	if os.Getenv("P7D_WRITE_DB") == "0" {
 		return
 	}
 
-	// err := DatabaseImport(pokemonData)
+	info, err := DatabasePokemonImport(pokemonData)
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	for _, item := range info {
+		spew.Fdump(&dataString, item)
+		writeFile(dataString.String(), "logQuery.txt")
+	}
+
+	fmt.Printf("TEST OUTPUT TO logQuery.txt")
 }
 
 /* important commands:

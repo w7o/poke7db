@@ -5,7 +5,7 @@ Any value stored in here SHOULD BE IMMUTABLE WITHIN THE DATABASE
 */
 
 var mapGrowthClass = map[string]int{
-	"medium-fast": 0,
+	"medium":      0,
 	"erratic":     1,
 	"fluctuating": 2,
 	"medium-slow": 3,
