@@ -34,10 +34,13 @@ import (
 	"github.com/davecgh/go-spew/spew"
 )
 
-var IS_MAIN_BUILD bool = true // MUST BE SET TO FALSE FOR EVERY VERSION BUMP
+var IS_MAIN_BUILD bool = false // MUST BE SET TO FALSE FOR EVERY VERSION BUMP
 var SITE string = "https://pokeapi.co/api/v2/"
-var VERSION string = "0.1.3"
+var VERSION string = "0.1.5_DBI"
+var DEV_TAG string = "dev"
 var PROJECT_NAME string = "Poké7DB"
+
+// {PROJECT_NAME} v{VERSION}-{DEV_TAG}-{timestamp}_{commitID}
 
 func generateVersionNumber() {
 	// If not development build, don't print commit details
@@ -73,7 +76,7 @@ func generateVersionNumber() {
 		}
 	}
 
-	VERSION = fmt.Sprintf("%s v%s.dev-%s_%s%s", PROJECT_NAME, VERSION, revTime, commit, modified)
+	VERSION = fmt.Sprintf("%s v%s-%s-%s_%s%s", PROJECT_NAME, VERSION, DEV_TAG, revTime, commit, modified)
 }
 
 func main() {
