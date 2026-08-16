@@ -68,7 +68,7 @@ func generateVersionNumber() {
 				fmt.Println(err)
 				return
 			}
-			revTime = fmt.Sprintf("%d", t.Unix())
+			revTime = fmt.Sprintf("%x", t.Unix())
 		case "vcs.revision":
 			commit = setting.Value[:7]
 		case "vcs.modified":
@@ -76,7 +76,7 @@ func generateVersionNumber() {
 		}
 	}
 
-	VERSION = fmt.Sprintf("%s v%s-%s-%s_%s%s", PROJECT_NAME, VERSION, DEV_TAG, revTime, commit, modified)
+	VERSION = fmt.Sprintf("%s v%s-%s [%s.%s]%s", PROJECT_NAME, VERSION, DEV_TAG, revTime, commit, modified)
 }
 
 func main() {
