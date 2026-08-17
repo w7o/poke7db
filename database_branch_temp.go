@@ -1,7 +1,19 @@
 package main
 
+import (
+	"database/sql"
+	"fmt"
+	"reflect"
+	//"strconv"
+	"strings"
+)
+
 /*
 Temporary branch because I accidentally left my v0.1.4 - v0.1.5 commits unpushed
+*/
+
+/*
+Struct type names MUST be in the format {TableName}TE
 */
 
 // T01/00
@@ -67,7 +79,69 @@ var pokemonEggGroup []PokemonEggGroupTE
 
 // var pokemonEVYields []PokemonEVYieldTE
 
-func initTemporaryData() {
+func insertStruct[T any](tx *sql.Tx, tableName string, dbStruct []T) error {
+	// Grab the type of the struct
+	structType := reflect.TypeOf(dbStruct[0])
+
+	// Grab the value of the structs
+	structValue := reflect.ValueOf(dbStruct)
+
+	// Check if T is struct
+	if structType.Kind() != reflect.Struct {
+		return retError("F_03", "Passed in type is not a struct", nil)
+	}
+
+	// Returns the number of fields in the struct
+	fields := structType.NumField()
+
+	// // grabs table name from {TableName}TE
+	// tableName := strings.TrimSuffix(structType.Name(), "TE")
+	// if tableName != structType.Name() {
+	// 	return retError("F_02", "Struct name doesn't have TE suffix", nil)
+	// }
+
+	// if need DB tag implementation: sDC 719-06#4
+
+	var fieldNames []string
+	var fieldValues []any
+	var placeholders []string
+	for i := 0; i < fields; i++ {
+		fieldNames = append(fieldNames, structType.Field(i).Name)
+	}
+
+	var placeholderIndex int = 1
+	for i := 0; i < structValue.Len(); i++ {
+		currStruct := structValue.Index(i)
+		var rowPlaceholders []string
+		for j := 0; j < fields; j++ {
+			fieldValues = append(fieldValues, currStruct.Field(j).Interface())
+			rowPlaceholders = append(rowPlaceholders,
+				fmt.Sprintf("$%d", placeholderIndex))
+			placeholderIndex++
+		}
+		placeholders = append(placeholders,
+			"("+strings.Join(rowPlaceholders, ", ")+")",
+		)
+	}
+
+	query := fmt.Sprintf(
+		"INSERT INTO %s (%s) VALUES %s",
+		tableName,
+		strings.Join(fieldNames, ", "),
+		strings.Join(placeholders, ", "),
+	)
+
+	_, err := tx.Exec(query, fieldValues...)
+	if err != nil {
+		writeLog(query)
+		writeLog(fmt.Sprintf("values: %v", fieldValues))
+		return retError("F_04", "Execution of query failed; offending query saved in log.txt", err)
+	}
+
+	return nil
+}
+
+func initTemporaryData() error {
 	pokemonSpecies = append(pokemonSpecies, PokemonSpeciesTE{
 		PokemonSpeciesID: "197",
 		PokemonName:      "Umbreon",
@@ -115,4 +189,32 @@ func initTemporaryData() {
 	// 		EVYield:          2,
 	// 	})
 
+	tx, err := database.Begin()
+	if err != nil {
+		return retError("F_00", "", err)
+	}
+	defer tx.Rollback()
+
+	type table struct {
+		TableName string
+		tableVar  any
+	}
+
+	var tables []table
+	tables = append(tables,
+		table{"PokemonSpecies", pokemonSpecies},
+		table{"PokemonForms", pokemonForm},
+	)
+
+	err = insertStruct(tx, "PokemonSpecies", pokemonSpecies)
+	if err != nil {
+		return err
+	}
+
+	err = insertStruct(tx, "PokemonForms", pokemonForm)
+	if err != nil {
+		return err
+	}
+
+	return nil
 }

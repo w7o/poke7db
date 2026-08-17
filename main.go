@@ -36,7 +36,7 @@ import (
 
 var IS_MAIN_BUILD bool = false // MUST BE SET TO FALSE FOR EVERY VERSION BUMP
 var SITE string = "https://pokeapi.co/api/v2/"
-var VERSION string = "0.1.5_DBI"
+var VERSION string = "0.1.6_DBI"
 var DEV_TAG string = "dev"
 var PROJECT_NAME string = "Poké7DB"
 
