@@ -59,7 +59,7 @@ type PokemonTypeTE struct {
 	TypeID        int
 }
 
-var pokemonTypes []PokemonTypeTE
+var pokemonType []PokemonTypeTE
 
 // T01/03
 type PokemonEggGroupTE struct {
@@ -79,26 +79,29 @@ var pokemonEggGroup []PokemonEggGroupTE
 
 // var pokemonEVYields []PokemonEVYieldTE
 
-func insertStruct[T any](tx *sql.Tx, tableName string, dbStruct []T) error {
-	// Grab the type of the struct
-	structType := reflect.TypeOf(dbStruct[0])
+func insertStruct(tx *sql.Tx, tableName string, dbStruct any) error {
 
 	// Grab the value of the structs
 	structValue := reflect.ValueOf(dbStruct)
 
+	if structValue.Kind() != reflect.Slice {
+		return retError("F_01", "Passed in type is not a list", nil)
+	}
+
+	if structValue.Len() == 0 {
+		return retError("F_02", "Passed in list doesn't contain anything", nil)
+	}
+
+	// structvalue[0] doesnt work
+	structType := structValue.Index(0).Type()
+
 	// Check if T is struct
-	if structType.Kind() != reflect.Struct {
+	if structValue.Len() == 0 {
 		return retError("F_03", "Passed in type is not a struct", nil)
 	}
 
 	// Returns the number of fields in the struct
 	fields := structType.NumField()
-
-	// // grabs table name from {TableName}TE
-	// tableName := strings.TrimSuffix(structType.Name(), "TE")
-	// if tableName != structType.Name() {
-	// 	return retError("F_02", "Struct name doesn't have TE suffix", nil)
-	// }
 
 	// if need DB tag implementation: sDC 719-06#4
 
@@ -170,7 +173,7 @@ func initTemporaryData() error {
 		Weight:              270,
 		BaseExperienceYield: 184,
 	})
-	pokemonTypes = append(pokemonTypes,
+	pokemonType = append(pokemonType,
 		PokemonTypeTE{
 			PokemonFormID: 197,
 			Slot:          0, //%TODO remember to make this 0-indexed when importing from pokeapi
@@ -195,25 +198,24 @@ func initTemporaryData() error {
 	}
 	defer tx.Rollback()
 
-	type table struct {
+	type tableStruct struct {
 		TableName string
-		tableVar  any
+		TableVar  any
 	}
 
-	var tables []table
+	var tables []tableStruct
 	tables = append(tables,
-		table{"PokemonSpecies", pokemonSpecies},
-		table{"PokemonForms", pokemonForm},
+		tableStruct{"PokemonSpecies", pokemonSpecies},
+		tableStruct{"PokemonForm", pokemonForm},
+		tableStruct{"PokemonType", pokemonType},
+		tableStruct{"PokemonEggGroup", pokemonEggGroup},
 	)
 
-	err = insertStruct(tx, "PokemonSpecies", pokemonSpecies)
-	if err != nil {
-		return err
-	}
-
-	err = insertStruct(tx, "PokemonForms", pokemonForm)
-	if err != nil {
-		return err
+	for _, table := range tables {
+		err = insertStruct(tx, table.TableName, table.TableVar)
+		if err != nil {
+			return err
+		}
 	}
 
 	return nil

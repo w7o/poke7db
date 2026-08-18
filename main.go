@@ -34,9 +34,9 @@ import (
 	"github.com/davecgh/go-spew/spew"
 )
 
-var IS_MAIN_BUILD bool = false // MUST BE SET TO FALSE FOR EVERY VERSION BUMP
+var IS_MAIN_BUILD bool = true // MUST BE SET TO FALSE FOR EVERY VERSION BUMP
 var SITE string = "https://pokeapi.co/api/v2/"
-var VERSION string = "0.1.6_DBI"
+var VERSION string = "0.1.7_DBI"
 var DEV_TAG string = "dev"
 var PROJECT_NAME string = "Poké7DB"
 
@@ -123,9 +123,17 @@ func main() {
 	fmt.Printf("POKéAPI OUTPUT TO log.txt")
 
 	if os.Getenv("P7D_WRITE_DB") == "0" {
-		return
+		writeLog("p7d_write_db no")
+		os.Exit(0)
+	}
+	writeLog("p7d_write_db yes")
+
+	err = initTemporaryData()
+	if err != nil {
+		log.Fatal(err.Error())
 	}
 
+	os.Exit(0)
 }
 
 /* important commands:
