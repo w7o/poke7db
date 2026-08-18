@@ -22,6 +22,7 @@ func nullableString(value *string) any {
 	return *value
 }
 
+// %TODO implement updating data sDC 719-06#5
 func insertStruct(tx *sql.Tx, tableName string, dbStruct any,
 	metadata metadataTemplate) error {
 
@@ -40,7 +41,7 @@ func insertStruct(tx *sql.Tx, tableName string, dbStruct any,
 	structType := structValue.Index(0).Type()
 
 	// Check if T is struct
-	if structValue.Len() == 0 {
+	if structType.Kind() != reflect.Struct {
 		return retError("F_03", "Passed in type is not a struct", nil)
 	}
 

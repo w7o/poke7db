@@ -501,12 +501,6 @@ func databaseSeedLookup(database *sql.DB) error {
 		return err
 	}
 
-	tx, err := database.Begin()
-	if err != nil {
-		return retError("D_08", "Database transaction init failed", err)
-	}
-	defer tx.Rollback()
-
 	var seedDir string = "./database/seed/00_lookup"
 	var schemaDir string = "./database/schema_columns/00_lookup"
 
@@ -515,11 +509,25 @@ func databaseSeedLookup(database *sql.DB) error {
 		return retError("D_09", "Reading seed lookup directory failed", err)
 	}
 
-	//@USER make this a setting/optional at some point
+	// set up database
+	tx, err := database.Begin()
+	if err != nil {
+		return retError("D_08", "Database transaction init failed", err)
+	}
+	defer tx.Rollback()
+
+	_, err = tx.Exec(`PRAGMA defer_foreign_keys = ON`)
+	if err != nil {
+		return retError("D_38", "Failed to enable the deferring of foreign keys", err)
+	}
+
+	// @USER make this a setting/optional at some point
 	err = clearLookupEntries(tx, files)
 	if err != nil {
 		return err
 	}
+
+	timestamp := time.Now().UTC().Format(time.RFC3339)
 
 	for _, file := range files {
 		if file.IsDir() {
@@ -542,8 +550,6 @@ func databaseSeedLookup(database *sql.DB) error {
 		csvPath := filepath.Join(seedDir, file.Name())
 
 		sqlPath := filepath.Join(schemaDir, sqlFileName)
-
-		timestamp := time.Now().UTC().Format(time.RFC3339)
 
 		err = seedTable(tx, csvPath, sqlPath, s, timestamp)
 		if err != nil {
