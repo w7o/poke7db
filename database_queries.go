@@ -9,7 +9,7 @@ import (
 )
 
 type PokemonSpeciesDBEntry struct {
-	PokemonSpeciesID string
+	PokemonSpeciesID string // alphanumeric dex numbers
 	PokemonName      string
 	Category         string
 	BaseHappiness    int
@@ -44,18 +44,24 @@ type PokemonTypeDBEntry struct {
 	TypeID        int
 }
 
+type PokemonEggGroupDBEntry struct {
+	PokemonSpeciesID string
+	Slot             int
+	EggGroupID       int
+}
+
 type PokemonEVYieldDBEntry struct {
 	PokemonFormID int
 	StatID        int
 	EVYield       int
 }
 
-// func boolToInt(b bool) int {
-// 	if b {
-// 		return 1
-// 	}
-// 	return 0
-// }
+func boolToInt(b bool) int {
+	if b {
+		return 1
+	}
+	return 0
+}
 
 /*
 Non-recoverable function
@@ -74,13 +80,6 @@ func extractIDfromURL(link string, errCode string) (id int) {
 		log.Fatal(retError(errCode, message, err))
 	}
 	return id
-}
-
-func boolToInt(b bool) int {
-	if b {
-		return 1
-	}
-	return 0
 }
 
 func pokemonSpeciesToTS(data APIPokemonSpecies) (PokemonSpeciesDBEntry, error) {
@@ -230,6 +229,7 @@ func DatabasePokemonImport(pokemonData Pokemon) ([]any, error) {
 		pokemonSpeciesEntry,
 		pokemonFormEntry,
 		typeEntry,
-		evYieldEntry)
+		evYieldEntry,
+	)
 	return ret, nil
 }

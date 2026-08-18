@@ -112,7 +112,7 @@ func main() {
 		log.Fatal(err.Error())
 	}
 
-	fmt.Printf("\nFinished request on %s\n\n%s\n", SITE, VERSION)
+	fmt.Printf("\nFinished request on %s", SITE)
 
 	SampleDatabaseQuery(database)
 	fmt.Printf("DATABASE EXAMPLE OUTPUT TO logDB.txt\n")
@@ -130,11 +130,6 @@ func main() {
 	}
 	writeLog("p7d_write_db yes")
 
-	err = initTemporaryData()
-	if err != nil {
-		log.Fatal(err.Error())
-	}
-
 	info, err := DatabasePokemonImport(pokemonData)
 	if err != nil {
 		log.Fatal(err)
@@ -147,6 +142,13 @@ func main() {
 	}
 
 	fmt.Printf("TEST OUTPUT TO logQuery.txt")
+
+	err = initTemporaryData()
+	if err != nil {
+		log.Fatal(err.Error())
+	}
+
+	fmt.Printf("\n\n%s", VERSION)
 }
 
 /* important commands:
