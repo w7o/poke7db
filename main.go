@@ -39,14 +39,14 @@ import (
 
 func main() {
 	version.GenerateVersionNumber()
-	fmt.Println(version.VERSION)
+	fmt.Println(version.G_Version)
 
 	logging.ResetLogFile()
 
 	// if $env:P7D_ENV="dev" then use locally stored instead
 
 	if os.Getenv("P7D_ENV") == "dev" {
-		version.SITE = "http://localhost:8080/"
+		version.G_Site = "http://localhost:8080/"
 	}
 
 	log.SetPrefix("pk7db: ")
@@ -70,7 +70,7 @@ func main() {
 		log.Fatal(err.Error())
 	}
 
-	fmt.Printf("\nFinished request on %s", version.SITE)
+	fmt.Printf("\nFinished request on %s", version.G_Site)
 
 	db.SampleDatabaseQuery(database)
 	fmt.Printf("DATABASE EXAMPLE OUTPUT TO logDB.txt\n")
@@ -106,7 +106,7 @@ func main() {
 	// 	log.Fatal(err.Error())
 	// }
 
-	fmt.Printf("\n\n%s", version.VERSION)
+	fmt.Printf("\n\n%s", version.G_Version)
 	os.Exit(0)
 }
 

@@ -87,7 +87,7 @@ returns a struct containing all exported information
 */
 func Poke_Query(id string) (Pokemon, error) {
 	// POKEMON
-	url := version.SITE + "pokemon/" + id
+	url := version.G_Site + "pokemon/" + id
 	// Grab JSON data using url
 	data, err := json_query(url)
 
@@ -103,7 +103,7 @@ func Poke_Query(id string) (Pokemon, error) {
 	}
 
 	// POKEMON-SPECIES
-	url = version.SITE + "pokemon-species/" + strconv.Itoa(pokemon.DexNum)
+	url = version.G_Site + "pokemon-species/" + strconv.Itoa(pokemon.DexNum)
 	data, err = json_query(url)
 
 	if err != nil {

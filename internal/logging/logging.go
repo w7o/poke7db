@@ -71,8 +71,8 @@ func RetError(code, message string, err error) error {
 
 func ResetMessageFile(header string, dest string) {
 	dest = convertDestToLogLocation(dest)
-	eq := strings.Repeat("=", len(dest)+len(version.VERSION)+3)
-	header = fmt.Sprintf("%s [%s]\n%s\n%s\n\n", dest, version.VERSION, eq, header)
+	eq := strings.Repeat("=", len(dest)+len(version.G_Version)+3)
+	header = fmt.Sprintf("%s [%s]\n%s\n%s\n\n", dest, version.G_Version, eq, header)
 	err := os.WriteFile(dest, []byte(header), 0666)
 	if err != nil {
 		log.Fatalf("Failed to initialize %s: %v", dest, err)

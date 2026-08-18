@@ -6,25 +6,25 @@ import (
 	"time"
 )
 
-var IS_MAIN_BUILD bool = false // MUST BE SET TO FALSE FOR EVERY VERSION BUMP
-var SITE string = "https://pokeapi.co/api/v2/"
-var VERSION string = "0.1.8"
-var DEV_TAG string = "dev"
-var PROJECT_NAME string = "Poké7DB"
+var G_IsMainBuild bool = true // MUST BE SET TO FALSE FOR EVERY VERSION BUMP
+var G_Site string = "https://pokeapi.co/api/v2/"
+var G_Version string = "0.1.9"
+var G_DevTag string = "dev"
+var G_ProjectName string = "Poké7DB"
 
 // {PROJECT_NAME} v{VERSION}-{DEV_TAG}-{timestamp}_{commitID}
 
 func GenerateVersionNumber() {
 	// If not development build, don't print commit details
 	// %TODO pre-release / beta/ alpha / release tag support
-	if IS_MAIN_BUILD {
-		VERSION = fmt.Sprintf("%s v%s", PROJECT_NAME, VERSION)
+	if G_IsMainBuild {
+		G_Version = fmt.Sprintf("%s v%s", G_ProjectName, G_Version)
 		return
 	}
 
 	info, ok := debug.ReadBuildInfo()
 	if !ok {
-		VERSION = fmt.Sprintf("%s UNKNOWN VERSION", PROJECT_NAME)
+		G_Version = fmt.Sprintf("%s UNKNOWN VERSION", G_ProjectName)
 		return
 	}
 
@@ -48,5 +48,5 @@ func GenerateVersionNumber() {
 		}
 	}
 
-	VERSION = fmt.Sprintf("%s v%s-%s [%s.%s]%s", PROJECT_NAME, VERSION, DEV_TAG, revTime, commit, modified)
+	G_Version = fmt.Sprintf("%s v%s-%s [%s.%s]%s", G_ProjectName, G_Version, G_DevTag, revTime, commit, modified)
 }
