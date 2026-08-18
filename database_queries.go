@@ -50,12 +50,12 @@ type PokemonEVYieldDBEntry struct {
 	EVYield       int
 }
 
-func boolToInt(b bool) int {
-	if b {
-		return 1
-	}
-	return 0
-}
+// func boolToInt(b bool) int {
+// 	if b {
+// 		return 1
+// 	}
+// 	return 0
+// }
 
 /*
 Non-recoverable function
@@ -74,6 +74,13 @@ func extractIDfromURL(link string, errCode string) (id int) {
 		log.Fatal(retError(errCode, message, err))
 	}
 	return id
+}
+
+func boolToInt(b bool) int {
+	if b {
+		return 1
+	}
+	return 0
 }
 
 func pokemonSpeciesToTS(data APIPokemonSpecies) (PokemonSpeciesDBEntry, error) {

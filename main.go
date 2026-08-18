@@ -34,10 +34,13 @@ import (
 	"github.com/davecgh/go-spew/spew"
 )
 
-var IS_MAIN_BUILD bool = true // MUST BE SET TO FALSE FOR EVERY VERSION BUMP
+var IS_MAIN_BUILD bool = false // MUST BE SET TO FALSE FOR EVERY VERSION BUMP
 var SITE string = "https://pokeapi.co/api/v2/"
-var VERSION string = "0.1.5"
+var VERSION string = "0.1.7_DBI"
+var DEV_TAG string = "dev"
 var PROJECT_NAME string = "Poké7DB"
+
+// {PROJECT_NAME} v{VERSION}-{DEV_TAG}-{timestamp}_{commitID}
 
 func generateVersionNumber() {
 	// If not development build, don't print commit details
@@ -65,7 +68,7 @@ func generateVersionNumber() {
 				fmt.Println(err)
 				return
 			}
-			revTime = fmt.Sprintf("%d", t.Unix())
+			revTime = fmt.Sprintf("%x", t.Unix())
 		case "vcs.revision":
 			commit = setting.Value[:7]
 		case "vcs.modified":
@@ -73,7 +76,7 @@ func generateVersionNumber() {
 		}
 	}
 
-	VERSION = fmt.Sprintf("%s v%s.dev-%s_%s%s", PROJECT_NAME, VERSION, revTime, commit, modified)
+	VERSION = fmt.Sprintf("%s v%s-%s [%s.%s]%s", PROJECT_NAME, VERSION, DEV_TAG, revTime, commit, modified)
 }
 
 func main() {
@@ -122,7 +125,14 @@ func main() {
 
 	fmt.Printf("API OUTPUT TO logOther.txt")
 	if os.Getenv("P7D_WRITE_DB") == "0" {
-		return
+		writeLog("p7d_write_db no")
+		os.Exit(0)
+	}
+	writeLog("p7d_write_db yes")
+
+	err = initTemporaryData()
+	if err != nil {
+		log.Fatal(err.Error())
 	}
 
 	info, err := DatabasePokemonImport(pokemonData)
