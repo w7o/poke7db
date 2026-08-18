@@ -1,4 +1,4 @@
-package main
+package api
 
 import (
 	"encoding/json"
@@ -12,6 +12,8 @@ import (
 	"path/filepath"
 	"strconv"
 	"strings"
+
+	"github.com/w7o/poke7db/internal/version"
 )
 
 func json_query(link string) ([]byte, error) {
@@ -83,9 +85,9 @@ func merge_pokemon_structs(api_species *APIPokemonSpecies, pokemon *Pokemon) {
 Queries the API for Pokémon statistics, and
 returns a struct containing all exported information
 */
-func poke_query(id string) (Pokemon, error) {
+func Poke_Query(id string) (Pokemon, error) {
 	// POKEMON
-	url := SITE + "pokemon/" + id
+	url := version.SITE + "pokemon/" + id
 	// Grab JSON data using url
 	data, err := json_query(url)
 
@@ -101,7 +103,7 @@ func poke_query(id string) (Pokemon, error) {
 	}
 
 	// POKEMON-SPECIES
-	url = SITE + "pokemon-species/" + strconv.Itoa(pokemon.DexNum)
+	url = version.SITE + "pokemon-species/" + strconv.Itoa(pokemon.DexNum)
 	data, err = json_query(url)
 
 	if err != nil {

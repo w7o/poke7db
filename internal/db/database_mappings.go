@@ -1,4 +1,4 @@
-package main
+package db
 
 /*
 Any value stored in here SHOULD BE IMMUTABLE WITHIN THE DATABASE

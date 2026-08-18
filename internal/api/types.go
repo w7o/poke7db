@@ -1,4 +1,4 @@
-package main
+package api
 
 /*
 Various types and structs

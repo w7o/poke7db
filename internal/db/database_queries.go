@@ -1,4 +1,4 @@
-package main
+package db
 
 import (
 	"fmt"
@@ -6,6 +6,9 @@ import (
 	"net/url"
 	"path"
 	"strconv"
+
+	"github.com/w7o/poke7db/internal/api"
+	"github.com/w7o/poke7db/internal/logging"
 )
 
 func boolToInt(b bool) int {
@@ -23,22 +26,22 @@ func extractIDfromURL(link string, errCode string) (id int) {
 	parsedURL, err := url.Parse(link)
 	if err != nil {
 		message := fmt.Sprintf("EIFU0 - Failed to parse link %s", link)
-		log.Fatal(retError(errCode, message, err))
+		log.Fatal(logging.RetError(errCode, message, err))
 	}
 	id, err = strconv.Atoi(path.Base(parsedURL.Path))
 	if err != nil {
 		message := fmt.Sprintf("EIFU1 - Failed to extract integer ID from URL %s",
 			parsedURL.String())
-		log.Fatal(retError(errCode, message, err))
+		log.Fatal(logging.RetError(errCode, message, err))
 	}
 	return id
 }
 
-func pokemonSpeciesToTS(data APIPokemonSpecies) (PokemonSpeciesDBEntry, error) {
+func pokemonSpeciesToTS(data api.APIPokemonSpecies) (PokemonSpeciesDBEntry, error) {
 	colorID, ok := mapColor[string(data.Color)]
 	if !ok {
 		message := fmt.Errorf("Unknown Pokémon color %s", string(data.Color))
-		err := retError("E_00", "", message)
+		err := logging.RetError("E_00", "", message)
 		return PokemonSpeciesDBEntry{}, err
 	}
 
@@ -46,7 +49,7 @@ func pokemonSpeciesToTS(data APIPokemonSpecies) (PokemonSpeciesDBEntry, error) {
 	if !ok {
 		message := fmt.Errorf("Unknown Pokémon shape %s with ID %d",
 			string(data.Shape.Name), extractIDfromURL(data.Shape.URL, ""))
-		err := retError("E_01", "", message)
+		err := logging.RetError("E_01", "", message)
 		return PokemonSpeciesDBEntry{}, err
 	}
 
@@ -54,7 +57,7 @@ func pokemonSpeciesToTS(data APIPokemonSpecies) (PokemonSpeciesDBEntry, error) {
 	if !ok {
 		message := fmt.Errorf("Unknown Pokémon growth rate %s",
 			string(data.GrowthRate))
-		err := retError("E_02", "", message)
+		err := logging.RetError("E_02", "", message)
 		return PokemonSpeciesDBEntry{}, err
 	}
 
@@ -74,7 +77,7 @@ func pokemonSpeciesToTS(data APIPokemonSpecies) (PokemonSpeciesDBEntry, error) {
 	}, nil
 }
 
-func pokemonFormsToTS(data Pokemon) (PokemonFormDBEntry, error) {
+func pokemonFormsToTS(data api.Pokemon) (PokemonFormDBEntry, error) {
 	return PokemonFormDBEntry{
 		PokemonFormID:       data.ID,
 		PokemonSpeciesID:    strconv.Itoa(data.DexNum),
@@ -92,7 +95,7 @@ func pokemonFormsToTS(data Pokemon) (PokemonFormDBEntry, error) {
 }
 
 // pass in Pokemon.StatBlock
-func pokemonEVYieldToTS(data StatBlock, pokemonFormID int) ([]PokemonEVYieldDBEntry, error) {
+func pokemonEVYieldToTS(data api.StatBlock, pokemonFormID int) ([]PokemonEVYieldDBEntry, error) {
 	entry := []PokemonEVYieldDBEntry{}
 
 	// helper function
@@ -125,7 +128,7 @@ func optionalMapI2I(id int, mapping map[int]int) int {
 }
 
 // pass in Pokemon.Types
-func pokemonTypesToTS(data []PokemonType, pokemonFormID int) ([]PokemonTypeDBEntry, error) {
+func pokemonTypesToTS(data []api.PokemonType, pokemonFormID int) ([]PokemonTypeDBEntry, error) {
 	entry := []PokemonTypeDBEntry{}
 	for _, d := range data {
 		typeID := extractIDfromURL(d.Type.URL, "E_04")
@@ -143,7 +146,7 @@ func pokemonTypesToTS(data []PokemonType, pokemonFormID int) ([]PokemonTypeDBEnt
 }
 
 // note: doesn't actually import to database yet ඞ
-func DatabasePokemonImport(pokemonData Pokemon) ([]any, error) {
+func DatabasePokemonImport(pokemonData api.Pokemon) ([]any, error) {
 	// T01/00
 	pokemonSpeciesEntry, err := pokemonSpeciesToTS(*pokemonData.SpeciesInfo)
 	if err != nil {

@@ -1,7 +1,7 @@
-package main
+package api
 
 /*
-Custom unmarshalling logic for specific types found in types.go
+Custom unmarshalling logic for specific types found in api/types.go
 */
 
 import (

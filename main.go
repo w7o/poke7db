@@ -28,67 +28,25 @@ import (
 	"fmt"
 	"log"
 	"os"
-	"runtime/debug"
-	"time"
 
 	"github.com/davecgh/go-spew/spew"
+
+	"github.com/w7o/poke7db/internal/api"
+	"github.com/w7o/poke7db/internal/db"
+	"github.com/w7o/poke7db/internal/logging"
+	"github.com/w7o/poke7db/internal/version"
 )
 
-var IS_MAIN_BUILD bool = true // MUST BE SET TO FALSE FOR EVERY VERSION BUMP
-var SITE string = "https://pokeapi.co/api/v2/"
-var VERSION string = "0.1.8"
-var DEV_TAG string = "dev"
-var PROJECT_NAME string = "Poké7DB"
-
-// {PROJECT_NAME} v{VERSION}-{DEV_TAG}-{timestamp}_{commitID}
-
-func generateVersionNumber() {
-	// If not development build, don't print commit details
-	// %TODO pre-release / beta/ alpha / release tag support
-	if IS_MAIN_BUILD {
-		VERSION = fmt.Sprintf("%s v%s", PROJECT_NAME, VERSION)
-		return
-	}
-
-	info, ok := debug.ReadBuildInfo()
-	if !ok {
-		VERSION = fmt.Sprintf("%s UNKNOWN VERSION", PROJECT_NAME)
-		return
-	}
-
-	commit := "unknown"
-	modified := ""
-	revTime := ""
-
-	for _, setting := range info.Settings {
-		switch setting.Key {
-		case "vcs.time":
-			t, err := time.Parse(time.RFC3339, setting.Value)
-			if err != nil {
-				fmt.Println(err)
-				return
-			}
-			revTime = fmt.Sprintf("%x", t.Unix())
-		case "vcs.revision":
-			commit = setting.Value[:7]
-		case "vcs.modified":
-			modified = " (modified)"
-		}
-	}
-
-	VERSION = fmt.Sprintf("%s v%s-%s [%s.%s]%s", PROJECT_NAME, VERSION, DEV_TAG, revTime, commit, modified)
-}
-
 func main() {
-	generateVersionNumber()
-	fmt.Println(VERSION)
+	version.GenerateVersionNumber()
+	fmt.Println(version.VERSION)
 
-	resetLogFile()
+	logging.ResetLogFile()
 
 	// if $env:P7D_ENV="dev" then use locally stored instead
 
 	if os.Getenv("P7D_ENV") == "dev" {
-		SITE = "http://localhost:8080/"
+		version.SITE = "http://localhost:8080/"
 	}
 
 	log.SetPrefix("pk7db: ")
@@ -99,56 +57,57 @@ func main() {
 	pokemonID := os.Args[1]
 
 	// initialize database
-	database, err := DatabaseInit("./database/app.db")
+	database, err := db.DatabaseInit("./database/app.db")
 	if err != nil {
 		log.Fatal(err)
 	}
 	defer database.Close()
 
-	var pokemonData Pokemon
-	pokemonData, err = poke_query(pokemonID)
+	var pokemonData api.Pokemon
+	pokemonData, err = api.Poke_Query(pokemonID)
 
 	if err != nil {
 		log.Fatal(err.Error())
 	}
 
-	fmt.Printf("\nFinished request on %s", SITE)
+	fmt.Printf("\nFinished request on %s", version.SITE)
 
-	SampleDatabaseQuery(database)
+	db.SampleDatabaseQuery(database)
 	fmt.Printf("DATABASE EXAMPLE OUTPUT TO logDB.txt\n")
 
 	var dataString bytes.Buffer
 	spew.Fdump(&dataString, pokemonData)
 
-	resetMessageFile("Other logs", "logOther.txt")
-	writeFile(dataString.String(), "logOther.txt")
+	logging.ResetMessageFile("Other logs", "logOther.txt")
+	logging.WriteFile(dataString.String(), "logOther.txt")
 
 	fmt.Printf("API OUTPUT TO logOther.txt\n")
 	if os.Getenv("P7D_WRITE_DB") == "0" {
-		writeLog("p7d_write_db no")
+		logging.WriteLog("p7d_write_db no")
 		os.Exit(0)
 	}
-	writeLog("p7d_write_db yes")
+	logging.WriteLog("p7d_write_db yes")
 
-	info, err := DatabasePokemonImport(pokemonData)
+	info, err := db.DatabasePokemonImport(pokemonData)
 	if err != nil {
 		log.Fatal(err)
 	}
 
-	resetMessageFile("logQuery", "logQuery.txt")
+	logging.ResetMessageFile("logQuery", "logQuery.txt")
 	for _, item := range info {
 		spew.Fdump(&dataString, item)
-		writeFile(dataString.String(), "logQuery.txt")
+		logging.WriteFile(dataString.String(), "logQuery.txt")
 	}
 
 	fmt.Printf("TEST OUTPUT TO logQuery.txt\n")
 
-	err = initTemporaryData()
-	if err != nil {
-		log.Fatal(err.Error())
-	}
+	// err = db.InitTemporaryData()
+	// if err != nil {
+	// 	log.Fatal(err.Error())
+	// }
 
-	fmt.Printf("\n\n%s", VERSION)
+	fmt.Printf("\n\n%s", version.VERSION)
+	os.Exit(0)
 }
 
 /* important commands:

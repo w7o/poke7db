@@ -1,4 +1,4 @@
-package main
+package db
 
 import (
 	"database/sql"
@@ -7,6 +7,8 @@ import (
 	// "strconv"
 	"strings"
 	"time"
+
+	"github.com/w7o/poke7db/internal/logging"
 )
 
 var pokemonSpecies []PokemonSpeciesDBEntry
@@ -23,18 +25,18 @@ func nullableString(value *string) any {
 }
 
 // %TODO implement updating data sDC 719-06#5
-func insertStruct(tx *sql.Tx, tableName string, dbStruct any,
+func upsertStruct(tx *sql.Tx, tableName string, dbStruct any,
 	metadata metadataTemplate) error {
 
 	// Grab the value of the structs
 	structValue := reflect.ValueOf(dbStruct)
 
 	if structValue.Kind() != reflect.Slice {
-		return retError("F_01", "Passed in type is not a list", nil)
+		return logging.RetError("F_01", "Passed in type is not a list", nil)
 	}
 
 	if structValue.Len() == 0 {
-		return retError("F_02", "Passed in list doesn't contain anything", nil)
+		return logging.RetError("F_02", "Passed in list doesn't contain anything", nil)
 	}
 
 	// structvalue[0] doesnt work
@@ -42,7 +44,7 @@ func insertStruct(tx *sql.Tx, tableName string, dbStruct any,
 
 	// Check if T is struct
 	if structType.Kind() != reflect.Struct {
-		return retError("F_03", "Passed in type is not a struct", nil)
+		return logging.RetError("F_03", "Passed in type is not a struct", nil)
 	}
 
 	// Returns the number of fields in the struct
@@ -65,7 +67,7 @@ func insertStruct(tx *sql.Tx, tableName string, dbStruct any,
 	hasUser := metadata.createdAt != nil || metadata.updatedAt != nil
 	hasUserCheck := hasUser || metadata.hasID
 	if hasNonUser == hasUserCheck {
-		return retError("F_05", "Invalid metadata field combination", nil)
+		return logging.RetError("F_05", "Invalid metadata field combination", nil)
 	}
 
 	var metadataValues []any
@@ -92,7 +94,7 @@ func insertStruct(tx *sql.Tx, tableName string, dbStruct any,
 		}
 	}
 
-	writeLog(fmt.Sprintf("DB: Field names: %v", fieldNames))
+	logging.WriteLog(fmt.Sprintf("DB: Field names: %v", fieldNames))
 	var placeholderIndex int = 1
 	for i := 0; i < structValue.Len(); i++ {
 		// currStruct represents the current struct (i.e. table)
@@ -139,14 +141,14 @@ func insertStruct(tx *sql.Tx, tableName string, dbStruct any,
 	)
 
 	_, err := tx.Exec(query, fieldValues...)
-	writeLog(fmt.Sprintf("DB:\n\tquery:%s\n\tvalues: %v", query, fieldValues))
+	logging.WriteLog(fmt.Sprintf("DB:\n\tquery:%s\n\tvalues: %v", query, fieldValues))
 	if err != nil {
-		return retError("F_04", "Execution of query failed; offending query saved in log.txt", err)
+		return logging.RetError("F_04", "Execution of query failed; offending query saved in log.txt", err)
 	}
 	return nil
 }
 
-func initTemporaryData() error {
+func InitTemporaryData() error {
 	pokemonSpecies = append(pokemonSpecies, PokemonSpeciesDBEntry{
 		PokemonSpeciesID: "197",
 		PokemonName:      "Umbreon",
@@ -196,7 +198,7 @@ func initTemporaryData() error {
 
 	tx, err := database.Begin()
 	if err != nil {
-		return retError("F_00", "", err)
+		return logging.RetError("F_00", "", err)
 	}
 	defer tx.Rollback()
 
@@ -224,7 +226,7 @@ func initTemporaryData() error {
 	)
 
 	for _, table := range tables {
-		err = insertStruct(tx, table.TableName, table.TableVar, metadata)
+		err = upsertStruct(tx, table.TableName, table.TableVar, metadata)
 		if err != nil {
 			return err
 		}
