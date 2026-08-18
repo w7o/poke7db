@@ -123,7 +123,7 @@ func main() {
 	resetMessageFile("Other logs", "logOther.txt")
 	writeFile(dataString.String(), "logOther.txt")
 
-	fmt.Printf("API OUTPUT TO logOther.txt")
+	fmt.Printf("API OUTPUT TO logOther.txt\n")
 	if os.Getenv("P7D_WRITE_DB") == "0" {
 		writeLog("p7d_write_db no")
 		os.Exit(0)
@@ -141,7 +141,7 @@ func main() {
 		writeFile(dataString.String(), "logQuery.txt")
 	}
 
-	fmt.Printf("TEST OUTPUT TO logQuery.txt")
+	fmt.Printf("TEST OUTPUT TO logQuery.txt\n")
 
 	err = initTemporaryData()
 	if err != nil {

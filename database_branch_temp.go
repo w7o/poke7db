@@ -4,8 +4,9 @@ import (
 	"database/sql"
 	"fmt"
 	"reflect"
-	//"strconv"
+	// "strconv"
 	"strings"
+	"time"
 )
 
 var pokemonSpecies []PokemonSpeciesDBEntry
@@ -14,7 +15,15 @@ var pokemonType []PokemonTypeDBEntry
 var pokemonEggGroup []PokemonEggGroupDBEntry
 var pokemonEVYields []PokemonEVYieldDBEntry
 
-func insertStruct(tx *sql.Tx, tableName string, dbStruct any) error {
+func nullableString(value *string) any {
+	if value == nil {
+		return nil
+	}
+	return *value
+}
+
+func insertStruct(tx *sql.Tx, tableName string, dbStruct any,
+	metadata metadataTemplate) error {
 
 	// Grab the value of the structs
 	structValue := reflect.ValueOf(dbStruct)
@@ -43,20 +52,79 @@ func insertStruct(tx *sql.Tx, tableName string, dbStruct any) error {
 	var fieldNames []string
 	var fieldValues []any
 	var placeholders []string
+
+	// set up table column names
 	for i := range fields {
 		fieldNames = append(fieldNames, structType.Field(i).Name)
 	}
 
+	// set up metadata
+	// sanity check
+	hasNonUser := metadata.importedAt != nil || metadata.checkedAt != nil
+	hasUser := metadata.createdAt != nil || metadata.updatedAt != nil
+	hasUserCheck := hasUser || metadata.hasID
+	if hasNonUser == hasUserCheck {
+		return retError("F_05", "Invalid metadata field combination", nil)
+	}
+
+	var metadataValues []any
+	fieldNames = append(fieldNames, "originID", "enabled")
+	metadataValues = append(metadataValues,
+		metadata.originID, //originID
+		1,                 //enabled
+	)
+	if hasNonUser {
+		fieldNames = append(fieldNames, "importedAt", "checkedAt")
+		metadataValues = append(metadataValues,
+			nullableString(metadata.importedAt), //importedAt
+			nullableString(metadata.checkedAt),  //checkedAt
+		)
+	} else { // hasUser
+		fieldNames = append(fieldNames, "createdAt", "updatedAt")
+		metadataValues = append(metadataValues,
+			nullableString(metadata.createdAt), //createdAt
+			nullableString(metadata.updatedAt), //updatedAt
+		)
+		if metadata.hasID {
+			fieldNames = append(fieldNames, "ID")
+			// metadata value insertion done in below loop
+		}
+	}
+
+	writeLog(fmt.Sprintf("DB: Field names: %v", fieldNames))
 	var placeholderIndex int = 1
 	for i := 0; i < structValue.Len(); i++ {
+		// currStruct represents the current struct (i.e. table)
 		currStruct := structValue.Index(i)
 		var rowPlaceholders []string
+
+		// add placeholders for the current row
 		for j := range fields {
 			fieldValues = append(fieldValues, currStruct.Field(j).Interface())
 			rowPlaceholders = append(rowPlaceholders,
 				fmt.Sprintf("$%d", placeholderIndex))
 			placeholderIndex++
 		}
+
+		// add metadata values
+		for _, value := range metadataValues {
+			fieldValues = append(fieldValues, value)
+			rowPlaceholders = append(rowPlaceholders,
+				fmt.Sprintf("$%d", placeholderIndex))
+			placeholderIndex++
+		}
+
+		// add ID w/ correct value if it's enabled
+		if metadata.hasID {
+			fieldValues = append(
+				fieldValues,
+				currStruct.Field(0).Interface(),
+			)
+			rowPlaceholders = append(rowPlaceholders,
+				fmt.Sprintf("$%d", placeholderIndex))
+			placeholderIndex++
+		}
+
 		placeholders = append(placeholders,
 			"("+strings.Join(rowPlaceholders, ", ")+")",
 		)
@@ -70,12 +138,10 @@ func insertStruct(tx *sql.Tx, tableName string, dbStruct any) error {
 	)
 
 	_, err := tx.Exec(query, fieldValues...)
+	writeLog(fmt.Sprintf("DB:\n\tquery:%s\n\tvalues: %v", query, fieldValues))
 	if err != nil {
-		writeLog(query)
-		writeLog(fmt.Sprintf("values: %v", fieldValues))
 		return retError("F_04", "Execution of query failed; offending query saved in log.txt", err)
 	}
-
 	return nil
 }
 
@@ -138,20 +204,30 @@ func initTemporaryData() error {
 		TableVar  any
 	}
 
+	timestamp := time.Now().UTC().Format(time.RFC3339)
+	metadata := metadataTemplate{
+		originID:   1, // PokéAPI
+		importedAt: &timestamp,
+		checkedAt:  nil,
+		enabled:    1,
+		hasID:      false,
+	}
+
 	var tables []tableStruct
 	tables = append(tables,
 		tableStruct{"PokemonSpecies", pokemonSpecies},
 		tableStruct{"PokemonForm", pokemonForm},
 		tableStruct{"PokemonType", pokemonType},
 		tableStruct{"PokemonEggGroup", pokemonEggGroup},
+		tableStruct{"PokemonEVYield", pokemonEVYields},
 	)
 
 	for _, table := range tables {
-		err = insertStruct(tx, table.TableName, table.TableVar)
+		err = insertStruct(tx, table.TableName, table.TableVar, metadata)
 		if err != nil {
 			return err
 		}
 	}
 
-	return nil
+	return tx.Commit()
 }

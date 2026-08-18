@@ -214,6 +214,7 @@ func seedTable(tx *sql.Tx, csvPath string, sqlPath string, tableIndex int, times
 	// Include createdAt timestamp if table contains metadata
 	// NOTE: If editing to include more seeded metadata in the future, check
 	// all includeMetadataCondition usages
+	// %TODO make below variable a variable taht changes if includeID
 	const userMetadataSeedValuesCount int = 2
 
 	if includeMetadataCondition {
