@@ -6,7 +6,7 @@ import (
 	"time"
 )
 
-var G_IsMainBuild bool = true // MUST BE SET TO FALSE FOR EVERY VERSION BUMP
+var G_IsMainBuild bool = false // MUST BE SET TO FALSE FOR EVERY VERSION BUMP
 var G_Site string = "https://pokeapi.co/api/v2/"
 var G_Version string = "0.1.9"
 var G_DevTag string = "dev"

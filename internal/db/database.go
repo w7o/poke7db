@@ -85,7 +85,7 @@ func convArbitraryRowsToStrings(rows *sql.Rows, numCol int) ([]string, error) {
 		for _, value := range values {
 			str, ok := value.(string)
 			if !ok {
-				return nil, fmt.Errorf("Expected primary key name to be string, got %T", value)
+				return nil, fmt.Errorf("expected primary key name to be string, got %T", value)
 			}
 			if value != nil {
 				strings = append(strings, str)
