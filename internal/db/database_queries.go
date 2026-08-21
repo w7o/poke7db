@@ -94,6 +94,27 @@ func pokemonFormsToTS(data api.Pokemon) (PokemonFormDBEntry, error) {
 	}, nil
 }
 
+// pass in Pokemon.EggGroups
+func pokemonEggGroupToTS(data []api.PokemonEggGroup, pokemonSpeciesID string) ([]PokemonEggGroupDBEntry, error) {
+	entry := []PokemonEggGroupDBEntry{}
+
+	for i, eggGroup := range data {
+		eggGroupID, ok := mapEggGroup[extractIDfromURL(eggGroup.URL, "E_05")]
+		if !ok {
+			message := fmt.Errorf("Unknown Pokémon egg group %s with ID %d",
+				string(eggGroup.Name), extractIDfromURL(eggGroup.URL, ""))
+			err := logging.RetError("E_06", "", message)
+			return []PokemonEggGroupDBEntry{}, err
+		}
+		entry = append(entry, PokemonEggGroupDBEntry{
+			PokemonSpeciesID: pokemonSpeciesID,
+			Slot:             i,
+			EggGroupID:       eggGroupID,
+		})
+	}
+	return entry, nil
+}
+
 // pass in Pokemon.StatBlock
 func pokemonEVYieldToTS(data api.StatBlock, pokemonFormID int) ([]PokemonEVYieldDBEntry, error) {
 	entry := []PokemonEVYieldDBEntry{}
@@ -145,7 +166,6 @@ func pokemonTypesToTS(data []api.PokemonType, pokemonFormID int) ([]PokemonTypeD
 	return entry, nil
 }
 
-// note: doesn't actually import to database yet ඞ
 func DatabasePokemonImport(pokemonData api.Pokemon) ([]any, error) {
 	// T01/00
 	pokemonSpeciesEntry, err := pokemonSpeciesToTS(*pokemonData.SpeciesInfo)
@@ -166,7 +186,8 @@ func DatabasePokemonImport(pokemonData api.Pokemon) ([]any, error) {
 	}
 
 	// T01/03 @TODO
-	// eggGroupEntry, err := pokemonEggGroupToTS(pokemonData.SpeciesInfo.EggGroups)
+	eggGroupEntry, err := pokemonEggGroupToTS(pokemonData.SpeciesInfo.EggGroups,
+		strconv.Itoa(pokemonData.DexNum))
 
 	// T01/04
 	evYieldEntry, err := pokemonEVYieldToTS(pokemonData.StatBlock, pokemonData.ID)
@@ -184,6 +205,7 @@ func DatabasePokemonImport(pokemonData api.Pokemon) ([]any, error) {
 		pokemonSpeciesEntry,
 		pokemonFormEntry,
 		typeEntry,
+		eggGroupEntry,
 		evYieldEntry,
 	)
 	return ret, nil
