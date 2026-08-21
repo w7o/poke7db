@@ -205,7 +205,7 @@ func generateTableQuery(tableName, colBody, colMetadata string) (string, error) 
 	`, tableName, colBody, colMetadata, colConstraint), nil
 }
 
-func stringRows(rows *sql.Rows) (string, error) {
+func StringRows(rows *sql.Rows) (string, error) {
 	columns, err := rows.Columns()
 	if err != nil {
 		return "", err
@@ -330,7 +330,7 @@ func SampleDatabaseQuery(database *sql.DB) error {
 	}
 
 	defer rows.Close()
-	ret, err := stringRows(rows)
+	ret, err := StringRows(rows)
 	if err != nil {
 		return err
 	}
