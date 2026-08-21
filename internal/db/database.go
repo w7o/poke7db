@@ -53,12 +53,47 @@ const userMetadataWithID string = userMetadataMain + userMetadataID + userMetada
 var database *sql.DB
 
 // Convert []string to []any
-func strToAny(values []string) []any {
+func convStringsToAnys(values []string) []any {
 	var result []any
 	for _, value := range values {
 		result = append(result, value)
 	}
 	return result
+}
+
+// Convert sql.Rows to []string
+func convArbitraryRowsToStrings(rows *sql.Rows, numCol int) ([]string, error) {
+	var strings []string
+
+	for rows.Next() {
+		// since Scan requires pointers,
+		// create fixed length lists to support variable pointers
+		values := make([]any, numCol)
+		pointers := make([]any, numCol)
+		for i := range values {
+			pointers[i] = &values[i]
+		}
+
+		// scans rows into the pointers, which themselves point to a table of values
+		err := rows.Scan(pointers...)
+		if err != nil {
+			return nil, err
+		}
+
+		// doing type assertion instead of make([]string) in case i want
+		// to split that into another helper function later
+		for _, value := range values {
+			str, ok := value.(string)
+			if !ok {
+				return nil, fmt.Errorf("Expected primary key name to be string, got %T", value)
+			}
+			if value != nil {
+				strings = append(strings, str)
+			}
+		}
+
+	}
+	return strings, nil
 }
 
 func extractFileIndexNumber(filename string) (int, error) {

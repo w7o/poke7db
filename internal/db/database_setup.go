@@ -120,7 +120,7 @@ func seedTable(tx *sql.Tx, csvPath string, sqlPath string, tableIndex int, times
 			return logging.RetError("D_16", message, err)
 		}
 
-		args := strToAny(row)
+		args := convStringsToAnys(row)
 
 		if includeMetadataCondition {
 			// ..., createdAt, enabled

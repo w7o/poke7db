@@ -4,6 +4,7 @@ import (
 	"database/sql"
 	"fmt"
 	"reflect"
+
 	// "strconv"
 	"strings"
 	"time"
@@ -24,85 +25,134 @@ func nullableString(value *string) any {
 	return *value
 }
 
-// %TODO implement updating data sDC 719-06#5
+// Inserts or updates the given data into a database --
+// dbStruct MUST be a list of THE SAME struct
 func upsertStruct(tx *sql.Tx, tableName string, dbStruct any,
 	metadata metadataTemplate) error {
 
-	// Grab the value of the structs
-	structValue := reflect.ValueOf(dbStruct)
+	// type field struct {
+	// 	name        string
+	// 	value       any
+	// 	allowUpdate bool
+	// }
+	// var fields []field
 
-	if structValue.Kind() != reflect.Slice {
+	// Get a reflect.Value representing a struct list's value
+	structReflect := reflect.ValueOf(dbStruct)
+
+	if structReflect.Kind() != reflect.Slice {
 		return logging.RetError("F_01", "Passed in type is not a list", nil)
 	}
 
-	if structValue.Len() == 0 {
+	numRows := structReflect.Len()
+	if numRows == 0 {
 		return logging.RetError("F_02", "Passed in list doesn't contain anything", nil)
 	}
 
-	// structvalue[0] doesnt work
-	structType := structValue.Index(0).Type()
-
-	// Check if T is struct
+	// Check if the value of the first item in the list is a struct, and that
+	// each value in the list is the same type
+	structType := structReflect.Index(0).Type()
 	if structType.Kind() != reflect.Struct {
-		return logging.RetError("F_03", "Passed in type is not a struct", nil)
+		return logging.RetError("F_03", "Passed in list isn't made of structs", nil)
+	}
+	for i := range numRows {
+		if structReflect.Index(i).Type() != structType {
+			return logging.RetError("F_08",
+				"All values in list are not the same struct, or the list isn't entirely made of structs",
+				nil)
+		}
 	}
 
-	// Returns the number of fields in the struct
-	fields := structType.NumField()
+	// Returns the number of numFields in the struct
+	numFields := structType.NumField()
 
 	// if need DB tag implementation: sDC 719-06#4
-
 	var fieldNames []string
+	var excludedFieldNames []string
 	var fieldValues []any
 	var placeholders []string
 
-	// set up table column names
-	for i := range fields {
+	// grab primary key sql.Rows
+	pkQuery := fmt.Sprintf(
+		"SELECT name FROM pragma_table_info('%s') WHERE pk > 0 ORDER BY pk",
+		tableName)
+	pkRows, err := tx.Query(pkQuery)
+	if err != nil {
+		logging.WriteLog(pkQuery)
+		return logging.RetError("F_06",
+			"Primary key query failed; offending query written to log", err)
+	}
+	defer pkRows.Close()
+
+	// extract primary keys from sql.Rows into excludeFieldNames
+	primaryKeys, err := convArbitraryRowsToStrings(pkRows, numFields)
+	if err != nil {
+		return logging.RetError("F_07",
+			"Converting extracted rows.Sql into string failed", err)
+	}
+	if len(primaryKeys) == 0 {
+		return logging.RetError("F_10", "Table has no primary key", nil)
+	}
+	excludedFieldNames = append(excludedFieldNames, primaryKeys...)
+
+	// returns all table column names minus metadata
+	for i := range numFields {
 		fieldNames = append(fieldNames, structType.Field(i).Name)
 	}
 
-	// set up metadata
-	// sanity check
-	hasNonUser := metadata.importedAt != nil || metadata.checkedAt != nil
-	hasUser := metadata.createdAt != nil || metadata.updatedAt != nil
-	hasUserCheck := hasUser || metadata.hasID
-	if hasNonUser == hasUserCheck {
+	// check imported metadata field validity:
+	// if importedAt is true then it's a non-user table
+	hasNonUser := metadata.importedAt != nil
+	// if createdAt is true then it's a user table
+	hasUser := metadata.createdAt != nil
+	// ID can only exist if it's a user table
+	idConditionFail := !hasUser && metadata.hasID
+	if (hasNonUser == hasUser) || (idConditionFail) {
 		return logging.RetError("F_05", "Invalid metadata field combination", nil)
 	}
 
 	var metadataValues []any
+
+	// handling metadata
 	fieldNames = append(fieldNames, "originID", "enabled")
+	excludedFieldNames = append(excludedFieldNames, "enabled")
 	metadataValues = append(metadataValues,
 		metadata.originID, //originID
 		1,                 //enabled
 	)
 	if hasNonUser {
 		fieldNames = append(fieldNames, "importedAt", "checkedAt")
+		excludedFieldNames = append(excludedFieldNames, "importedAt")
 		metadataValues = append(metadataValues,
 			nullableString(metadata.importedAt), //importedAt
 			nullableString(metadata.checkedAt),  //checkedAt
 		)
 	} else { // hasUser
 		fieldNames = append(fieldNames, "createdAt", "updatedAt")
+		excludedFieldNames = append(excludedFieldNames, "createdAt")
 		metadataValues = append(metadataValues,
 			nullableString(metadata.createdAt), //createdAt
 			nullableString(metadata.updatedAt), //updatedAt
 		)
 		if metadata.hasID {
 			fieldNames = append(fieldNames, "ID")
+			excludedFieldNames = append(excludedFieldNames, "ID")
 			// metadata value insertion done in below loop
 		}
 	}
 
 	logging.WriteLog(fmt.Sprintf("DB: Field names: %v", fieldNames))
+	logging.WriteLog(fmt.Sprintf("DB: Excluded fields: %v", excludedFieldNames))
+
+	// construct placeholders
 	var placeholderIndex int = 1
-	for i := 0; i < structValue.Len(); i++ {
+	for i := 0; i < structReflect.Len(); i++ {
 		// currStruct represents the current struct (i.e. table)
-		currStruct := structValue.Index(i)
+		currStruct := structReflect.Index(i)
 		var rowPlaceholders []string
 
 		// add placeholders for the current row
-		for j := range fields {
+		for j := range numFields {
 			fieldValues = append(fieldValues, currStruct.Field(j).Interface())
 			rowPlaceholders = append(rowPlaceholders,
 				fmt.Sprintf("$%d", placeholderIndex))
@@ -117,8 +167,13 @@ func upsertStruct(tx *sql.Tx, tableName string, dbStruct any,
 			placeholderIndex++
 		}
 
-		// add ID w/ correct value if it's enabled
+		// add ID w/ value of primary key if it's enabled
 		if metadata.hasID {
+			if len(primaryKeys) > 1 {
+				return logging.RetError("F_09",
+					"ID is enabled when there are multiple primary keys; cannot derive ID value",
+					nil)
+			}
 			fieldValues = append(
 				fieldValues,
 				currStruct.Field(0).Interface(),
@@ -133,14 +188,34 @@ func upsertStruct(tx *sql.Tx, tableName string, dbStruct any,
 		)
 	}
 
+	// build on conflict update section
+	var updateFields []string
+	for _, fieldName := range fieldNames {
+		excluded := false
+
+		for _, excludedField := range excludedFieldNames {
+			if fieldName == excludedField {
+				excluded = true
+				break
+			}
+		}
+
+		if !excluded {
+			updateFields = append(updateFields,
+				fmt.Sprintf("%s = EXCLUDED.%s", fieldName, fieldName))
+		}
+	}
+
 	query := fmt.Sprintf(
-		"INSERT INTO %s (%s) VALUES %s",
+		"INSERT INTO %s (%s) VALUES %s ON CONFLICT (%s) DO UPDATE SET %s",
 		tableName,
 		strings.Join(fieldNames, ", "),
 		strings.Join(placeholders, ", "),
+		strings.Join(primaryKeys, ", "),
+		strings.Join(updateFields, ", "),
 	)
 
-	_, err := tx.Exec(query, fieldValues...)
+	_, err = tx.Exec(query, fieldValues...)
 	logging.WriteLog(fmt.Sprintf("DB:\n\tquery:%s\n\tvalues: %v", query, fieldValues))
 	if err != nil {
 		return logging.RetError("F_04", "Execution of query failed; offending query saved in log.txt", err)

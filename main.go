@@ -101,10 +101,10 @@ func main() {
 
 	fmt.Printf("TEST OUTPUT TO logQuery.txt\n")
 
-	// err = db.InitTemporaryData()
-	// if err != nil {
-	// 	log.Fatal(err.Error())
-	// }
+	err = db.InitTemporaryData()
+	if err != nil {
+		log.Fatal(err.Error())
+	}
 
 	fmt.Printf("\n\n%s", version.G_Version)
 	os.Exit(0)
