@@ -6,6 +6,7 @@ This project was created for the following purposes:
 ## Commit Message Tags
 *As of v0.1.9*
 * [v0.X.X] - Build that I feel is completed enough to push to git
+* (B) - Bug fixes
 * (D) - Documentation changes (comments/README)
 * (R) - Refactor
 * (U) - Unstable build
