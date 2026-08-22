@@ -1,5 +1,9 @@
 package db
 
+/*
+Database seeding and table construction code
+*/
+
 import (
 	// "context"
 

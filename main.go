@@ -55,6 +55,7 @@ func main() {
 
 	// testing variable (defaults to 197 as per Makefile)
 	pokemonID := os.Args[1]
+	db.D_setDexNum(pokemonID) // debug print
 
 	// initialize database
 	database, err := db.DatabaseInit("./database/app.db")

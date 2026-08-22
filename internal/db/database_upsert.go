@@ -236,7 +236,7 @@ func upsertTables(tables []tableStruct, originID Origin) error {
 
 	for _, table := range tables {
 		logging.WriteLog("===\nBEFORE")
-		err = queryAndLog(tx, testQueries[table.TableName])
+		err = d_queryAndLog(tx, d_testQueries[table.TableName]+d_dexNum)
 		if err != nil {
 			return err
 		}
@@ -245,36 +245,11 @@ func upsertTables(tables []tableStruct, originID Origin) error {
 			return err
 		}
 		logging.WriteLog("AFTER")
-		err = queryAndLog(tx, testQueries[table.TableName])
+		err = d_queryAndLog(tx, d_testQueries[table.TableName]+d_dexNum)
 		if err != nil {
 			return err
 		}
 	}
 
 	return tx.Commit()
-}
-
-var testQueries = map[string]string{
-	"PokemonSpecies": "SELECT * FROM PokemonSpecies WHERE PokemonSpeciesID = 197",
-
-	"PokemonForm": "SELECT * FROM PokemonForm WHERE PokemonFormID = 197",
-
-	"PokemonType": "SELECT * FROM PokemonType WHERE PokemonFormID = 197",
-
-	"PokemonEggGroup": "SELECT * FROM PokemonEggGroup WHERE PokemonSpeciesID = 197",
-
-	"PokemonEVYield": "SELECT * FROM PokemonEVYield WHERE PokemonFormID = 197",
-}
-
-func queryAndLog(tx *sql.Tx, query string) error {
-	r, err := tx.Query(query)
-	if err != nil {
-		return err
-	}
-	rr, err := StringRows(r)
-	if err != nil {
-		return err
-	}
-	logging.WriteLog(rr)
-	return nil
 }
