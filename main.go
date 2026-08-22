@@ -88,23 +88,23 @@ func main() {
 	}
 	logging.WriteLog("p7d_write_db yes")
 
-	info, err := db.DatabasePokemonImport(pokemonData)
+	err = db.DatabasePokemonImport(pokemonData)
 	if err != nil {
 		log.Fatal(err)
 	}
 
-	logging.ResetMessageFile("logQuery", "logQuery.txt")
-	for _, item := range info {
-		spew.Fdump(&dataString, item)
-		logging.WriteFile(dataString.String(), "logQuery.txt")
-	}
+	// logging.ResetMessageFile("logQuery", "logQuery.txt")
+	// for _, item := range info {
+	// 	spew.Fdump(&dataString, item)
+	// 	logging.WriteFile(dataString.String(), "logQuery.txt")
+	// }
 
-	fmt.Printf("TEST OUTPUT TO logQuery.txt\n")
+	// fmt.Printf("TEST OUTPUT TO logQuery.txt\n")
 
-	err = db.InitTemporaryData()
-	if err != nil {
-		log.Fatal(err.Error())
-	}
+	// err = db.InitTemporaryData()
+	// if err != nil {
+	// 	log.Fatal(err.Error())
+	// }
 
 	fmt.Printf("\n\n%s", version.G_Version)
 	os.Exit(0)

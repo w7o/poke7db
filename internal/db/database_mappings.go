@@ -4,6 +4,16 @@ package db
 Any value stored in here SHOULD BE IMMUTABLE WITHIN THE DATABASE
 */
 
+type Origin int
+
+const (
+	OUser Origin = iota
+	OPokeAPI
+	OShowdown
+	OBulbapedia
+	OPoke7DB
+)
+
 var mapGrowthClass = map[string]int{
 	"medium":      0,
 	"erratic":     1,

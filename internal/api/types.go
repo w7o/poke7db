@@ -124,9 +124,6 @@ type APIPokemonSpecies struct {
 	// for further processing
 	EvolutionChain EvolutionChain `json:"evolution_chain"`
 	// FormsList      []PokemonForm  `json:"varieties"`
-
-	// %TODO Pokemon Evolutions Parsing
-	// %TODO Growth rate
 }
 
 /*

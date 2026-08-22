@@ -1,5 +1,9 @@
 package db
 
+/*
+Database initialization + utility functions
+*/
+
 import (
 	// "context"
 

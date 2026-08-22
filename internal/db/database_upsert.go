@@ -12,12 +12,6 @@ import (
 	"github.com/w7o/poke7db/internal/logging"
 )
 
-var pokemonSpecies []PokemonSpeciesDBEntry
-var pokemonForm []PokemonFormDBEntry
-var pokemonType []PokemonTypeDBEntry
-var pokemonEggGroup []PokemonEggGroupDBEntry
-var pokemonEVYields []PokemonEVYieldDBEntry
-
 func nullableString(value *string) any {
 	if value == nil {
 		return nil
@@ -25,23 +19,21 @@ func nullableString(value *string) any {
 	return *value
 }
 
+// %MDO: structs instead of managing name and value separately..?
+
 // Inserts or updates the given data into a database --
 // dbStruct MUST be a list of THE SAME struct
 func upsertStruct(tx *sql.Tx, tableName string, dbStruct any,
 	metadata metadataTemplate) error {
 
-	// type field struct {
-	// 	name        string
-	// 	value       any
-	// 	allowUpdate bool
-	// }
-	// var fields []field
-
 	// Get a reflect.Value representing a struct list's value
 	structReflect := reflect.ValueOf(dbStruct)
 
 	if structReflect.Kind() != reflect.Slice {
-		return logging.RetError("F_01", "Passed in type is not a list", nil)
+		//%TODO
+		return logging.RetError("F_01",
+			fmt.Sprintf("Passed in type %T is not a list", dbStruct),
+			nil)
 	}
 
 	numRows := structReflect.Len()
@@ -223,82 +215,24 @@ func upsertStruct(tx *sql.Tx, tableName string, dbStruct any,
 	return nil
 }
 
-func InitTemporaryData() error {
-	pokemonSpecies = append(pokemonSpecies, PokemonSpeciesDBEntry{
-		PokemonSpeciesID: "197",
-		PokemonName:      "Umbreon",
-		Category:         "Moonlight Pokémon",
-		BaseHappiness:    35,
-		CaptureRate:      45,
-		GrowthRateID:     0,
-		GenderRate:       2,
-		HatchCounter:     35,
-		ColorID:          4,
-		ShapeID:          0,
-		IsMythical:       0,
-		IsLegendary:      0,
-	})
-	pokemonForm = append(pokemonForm, PokemonFormDBEntry{
-		PokemonFormID:       197,
-		PokemonSpeciesID:    "197",
-		FormName:            "Umbreon",
-		StatHP:              95,
-		StatAttack:          65,
-		StatDefense:         110,
-		StatSpecialAttack:   60,
-		StatSpecialDefense:  130,
-		StatSpeed:           65,
-		Height:              10,
-		Weight:              270,
-		BaseExperienceYield: 184,
-	})
-	pokemonType = append(pokemonType,
-		PokemonTypeDBEntry{
-			PokemonFormID: 197,
-			Slot:          0, //%TODO remember to make this 0-indexed when importing from pokeapi
-			TypeID:        17,
-		})
-	pokemonEggGroup = append(pokemonEggGroup,
-		PokemonEggGroupDBEntry{
-			PokemonSpeciesID: "197",
-			Slot:             0,
-			EggGroupID:       8,
-		})
-	pokemonEVYields = append(pokemonEVYields,
-		PokemonEVYieldDBEntry{
-			PokemonFormID: 197,
-			StatID:        4,
-			EVYield:       2,
-		})
-
+func upsertTables(tables []tableStruct, originID Origin) error {
+	// %TODO fix call to this and also finish this
 	tx, err := database.Begin()
 	if err != nil {
-		return logging.RetError("F_00", "", err)
+		return logging.RetError("F_00", "Error beginning database transaction", err)
 	}
 	defer tx.Rollback()
 
-	type tableStruct struct {
-		TableName string
-		TableVar  any
-	}
-
+	// %TODO
+	// Set up metadata (currently only for non-user tables)
 	timestamp := time.Now().UTC().Format(time.RFC3339)
 	metadata := metadataTemplate{
-		originID:   1, // PokéAPI
+		originID:   int(originID),
 		importedAt: &timestamp,
 		checkedAt:  &timestamp,
 		enabled:    1,
 		hasID:      false,
 	}
-
-	var tables []tableStruct
-	tables = append(tables,
-		tableStruct{"PokemonSpecies", pokemonSpecies},
-		tableStruct{"PokemonForm", pokemonForm},
-		tableStruct{"PokemonType", pokemonType},
-		tableStruct{"PokemonEggGroup", pokemonEggGroup},
-		tableStruct{"PokemonEVYield", pokemonEVYields},
-	)
 
 	for _, table := range tables {
 		logging.WriteLog("===\nBEFORE")

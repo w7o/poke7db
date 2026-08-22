@@ -1,5 +1,9 @@
 package db
 
+/*
+Structs for API -> DB conversion
+*/
+
 type metadataTemplate struct {
 	originID   int
 	importedAt *string // non-user

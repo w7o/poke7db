@@ -11,6 +11,11 @@ import (
 	"github.com/w7o/poke7db/internal/logging"
 )
 
+type tableStruct struct {
+	TableName string
+	TableVar  any
+}
+
 func boolToInt(b bool) int {
 	if b {
 		return 1
@@ -37,12 +42,12 @@ func extractIDfromURL(link string, errCode string) (id int) {
 	return id
 }
 
-func pokemonSpeciesToTS(data api.APIPokemonSpecies) (PokemonSpeciesDBEntry, error) {
+func pokemonSpeciesToTS(data api.APIPokemonSpecies) ([]PokemonSpeciesDBEntry, error) {
 	colorID, ok := mapColor[string(data.Color)]
 	if !ok {
 		message := fmt.Errorf("Unknown Pokémon color %s", string(data.Color))
 		err := logging.RetError("E_00", "", message)
-		return PokemonSpeciesDBEntry{}, err
+		return []PokemonSpeciesDBEntry{}, err
 	}
 
 	shapeID, ok := mapShape[extractIDfromURL(data.Shape.URL, "E_03")]
@@ -50,7 +55,7 @@ func pokemonSpeciesToTS(data api.APIPokemonSpecies) (PokemonSpeciesDBEntry, erro
 		message := fmt.Errorf("Unknown Pokémon shape %s with ID %d",
 			string(data.Shape.Name), extractIDfromURL(data.Shape.URL, ""))
 		err := logging.RetError("E_01", "", message)
-		return PokemonSpeciesDBEntry{}, err
+		return []PokemonSpeciesDBEntry{}, err
 	}
 
 	growthRateID, ok := mapGrowthClass[string(data.GrowthRate)]
@@ -58,10 +63,10 @@ func pokemonSpeciesToTS(data api.APIPokemonSpecies) (PokemonSpeciesDBEntry, erro
 		message := fmt.Errorf("Unknown Pokémon growth rate %s",
 			string(data.GrowthRate))
 		err := logging.RetError("E_02", "", message)
-		return PokemonSpeciesDBEntry{}, err
+		return []PokemonSpeciesDBEntry{}, err
 	}
 
-	return PokemonSpeciesDBEntry{
+	return []PokemonSpeciesDBEntry{{
 		PokemonSpeciesID: strconv.Itoa(data.DexNum),
 		PokemonName:      string(data.Name),
 		ColorID:          colorID,
@@ -74,11 +79,11 @@ func pokemonSpeciesToTS(data api.APIPokemonSpecies) (PokemonSpeciesDBEntry, erro
 		GenderRate:       int(data.GenderRate) * 2, // frac out of 16 in DB
 		IsMythical:       boolToInt(data.IsMythical),
 		IsLegendary:      boolToInt(data.IsLegendary),
-	}, nil
+	}}, nil
 }
 
-func pokemonFormsToTS(data api.Pokemon) (PokemonFormDBEntry, error) {
-	return PokemonFormDBEntry{
+func pokemonFormsToTS(data api.Pokemon) ([]PokemonFormDBEntry, error) {
+	return []PokemonFormDBEntry{{
 		PokemonFormID:       data.ID,
 		PokemonSpeciesID:    strconv.Itoa(data.DexNum),
 		FormName:            data.FormName,
@@ -91,7 +96,7 @@ func pokemonFormsToTS(data api.Pokemon) (PokemonFormDBEntry, error) {
 		Height:              data.Height,
 		Weight:              data.Weight,
 		BaseExperienceYield: data.BaseEXP,
-	}, nil
+	}}, nil
 }
 
 // pass in Pokemon.EggGroups
@@ -158,7 +163,7 @@ func pokemonTypesToTS(data []api.PokemonType, pokemonFormID int) ([]PokemonTypeD
 		entry = append(entry,
 			PokemonTypeDBEntry{
 				PokemonFormID: pokemonFormID,
-				Slot:          d.Slot,
+				Slot:          d.Slot - 1, // 0-indexed in DB
 				TypeID:        typeID,
 			})
 	}
@@ -166,33 +171,33 @@ func pokemonTypesToTS(data []api.PokemonType, pokemonFormID int) ([]PokemonTypeD
 	return entry, nil
 }
 
-func DatabasePokemonImport(pokemonData api.Pokemon) ([]any, error) {
+func DatabasePokemonImport(pokemonData api.Pokemon) error {
 	// T01/00
 	pokemonSpeciesEntry, err := pokemonSpeciesToTS(*pokemonData.SpeciesInfo)
 	if err != nil {
-		return nil, err
+		return err
 	}
 
 	// T01/01
 	pokemonFormEntry, err := pokemonFormsToTS(pokemonData)
 	if err != nil {
-		return nil, err
+		return err
 	}
 
 	// T01/02
 	typeEntry, err := pokemonTypesToTS(pokemonData.Types, pokemonData.ID)
 	if err != nil {
-		return nil, err
+		return err
 	}
 
-	// T01/03 @TODO
+	// T01/03
 	eggGroupEntry, err := pokemonEggGroupToTS(pokemonData.SpeciesInfo.EggGroups,
 		strconv.Itoa(pokemonData.DexNum))
 
 	// T01/04
 	evYieldEntry, err := pokemonEVYieldToTS(pokemonData.StatBlock, pokemonData.ID)
 	if err != nil {
-		return nil, err
+		return err
 	}
 
 	// T02/03 (learnset)
@@ -200,13 +205,22 @@ func DatabasePokemonImport(pokemonData api.Pokemon) ([]any, error) {
 	// T04/01 (pokemonhelditem)
 	// T10/00 (evolution)
 
-	ret := []any{}
-	ret = append(ret,
-		pokemonSpeciesEntry,
-		pokemonFormEntry,
-		typeEntry,
-		eggGroupEntry,
-		evYieldEntry,
+	var tables []tableStruct
+	tables = append(tables,
+		tableStruct{"PokemonSpecies", pokemonSpeciesEntry},
+		tableStruct{"PokemonForm", pokemonFormEntry},
+		tableStruct{"PokemonType", typeEntry},
+		tableStruct{"PokemonEggGroup", eggGroupEntry},
+		tableStruct{"PokemonEVYield", evYieldEntry},
 	)
-	return ret, nil
+
+	err = upsertTables(tables, OPokeAPI)
+	if err != nil {
+		return logging.RetError("E_07",
+			fmt.Sprintf("Upserting phase for DatabasePokemonImport for Pokemon No. %d failed",
+				pokemonData.DexNum),
+			err)
+	}
+
+	return nil
 }
